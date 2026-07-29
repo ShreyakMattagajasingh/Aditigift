@@ -1,5 +1,5 @@
 import { SceneDevEditor } from "../systems/SceneDevEditor.js";
-import { isTextInputActive } from "../shared.js";
+import { isTextInputActive, setCanvasMode } from "../shared.js";
 import { InventoryPanel } from "../systems/Inventory.js";
 import { RemotePlayer } from "../systems/RemotePlayer.js";
 import { ChatSystem } from "../systems/ChatSystem.js";
@@ -40,8 +40,7 @@ export class ChocolateShoppeScene extends Phaser.Scene {
 	}
 
 	create() {
-		this.game.canvas.classList.remove("game-portrait", "game-landscape", "game-standard");
-		this.game.canvas.classList.add("game-widescreen");
+		setCanvasMode(this.game.canvas, "game-widescreen");
 		this.scale.setGameSize(VIEW_WIDTH, VIEW_HEIGHT);
 		this.scale.refresh();
 		if (screen.orientation?.lock) screen.orientation.lock("landscape").catch(() => {});

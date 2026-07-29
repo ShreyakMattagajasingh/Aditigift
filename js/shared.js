@@ -2,6 +2,13 @@
 
 export const TILE = 32;
 export const MOVE_SPEED = 200; // px/sec, matches the Godot build
+const CANVAS_MODE_CLASSES = [
+	"game-portrait",
+	"game-landscape",
+	"game-standard",
+	"game-widescreen",
+	"game-full-landscape",
+];
 
 export const OUTFITS = [
 	{ key: "badger", label: "Badger Red", tex: "player_badger" },
@@ -21,4 +28,9 @@ export function isTextInputElement(element) {
 
 export function isTextInputActive() {
 	return window.__textInputActive === true || isTextInputElement(document.activeElement);
+}
+
+export function setCanvasMode(canvas, mode) {
+	canvas.classList.remove(...CANVAS_MODE_CLASSES);
+	canvas.classList.add(mode);
 }

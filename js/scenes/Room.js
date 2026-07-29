@@ -1,4 +1,4 @@
-import { TILE, MOVE_SPEED, OUTFITS, isTextInputActive, rectsOverlap } from "../shared.js";
+import { TILE, MOVE_SPEED, OUTFITS, isTextInputActive, rectsOverlap, setCanvasMode } from "../shared.js";
 import { getInventory, InventoryPanel, transferInventoryItem } from "../systems/Inventory.js";
 import { multiplayer } from "../systems/Multiplayer.js";
 import { layoutStore } from "../systems/LayoutStore.js";
@@ -21,8 +21,7 @@ export class RoomScene extends Phaser.Scene {
 	}
 
 	create() {
-		this.game.canvas.classList.remove("game-landscape", "game-standard", "game-widescreen");
-		this.game.canvas.classList.add("game-portrait");
+		setCanvasMode(this.game.canvas, "game-portrait");
 		this.scale.setGameSize(288, 384);
 		this.scale.refresh();
 		if (screen.orientation?.unlock) screen.orientation.unlock();

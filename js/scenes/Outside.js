@@ -1,5 +1,5 @@
 import { SceneDevEditor } from "../systems/SceneDevEditor.js";
-import { isTextInputActive } from "../shared.js";
+import { isTextInputActive, setCanvasMode } from "../shared.js";
 import { InventoryPanel } from "../systems/Inventory.js";
 import { RemotePlayer } from "../systems/RemotePlayer.js";
 import { ChatSystem } from "../systems/ChatSystem.js";
@@ -112,8 +112,7 @@ export class OutsideScene extends Phaser.Scene {
 			return;
 		}
 		this.viewportDevMode = devMode;
-		this.game.canvas.classList.remove("game-portrait", "game-landscape", "game-standard", "game-widescreen", "game-full-landscape");
-		this.game.canvas.classList.add(devMode ? "game-portrait" : "game-full-landscape");
+		setCanvasMode(this.game.canvas, devMode ? "game-portrait" : "game-full-landscape");
 		this.scale.setGameSize(expectedWidth, expectedHeight);
 		this.scale.refresh();
 		this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT);

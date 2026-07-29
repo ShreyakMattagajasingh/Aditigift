@@ -1,5 +1,5 @@
 import { SceneDevEditor } from "../systems/SceneDevEditor.js";
-import { isTextInputActive } from "../shared.js";
+import { isTextInputActive, setCanvasMode } from "../shared.js";
 import { addInventoryItem, deliverInventoryItem, InventoryPanel } from "../systems/Inventory.js";
 import { RemotePlayer } from "../systems/RemotePlayer.js";
 import { ChatSystem } from "../systems/ChatSystem.js";
@@ -23,8 +23,7 @@ export class CorridorScene extends Phaser.Scene {
 	}
 
 	create() {
-		this.game.canvas.classList.remove("game-portrait", "game-standard", "game-widescreen");
-		this.game.canvas.classList.add("game-landscape");
+		setCanvasMode(this.game.canvas, "game-landscape");
 		this.scale.setGameSize(WIDTH, HEIGHT);
 		this.scale.refresh();
 		if (screen.orientation?.lock) screen.orientation.lock("landscape").catch(() => {});
