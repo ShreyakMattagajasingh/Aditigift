@@ -1,4 +1,5 @@
 const API_PATH = "/api/layouts";
+const DEPLOYED_DEFAULT_PATH = "/data/layouts.json";
 
 export class LayoutStore {
 	constructor() {
@@ -8,15 +9,20 @@ export class LayoutStore {
 	}
 
 	async _load() {
-		try {
-			const response = await fetch(API_PATH, { cache: "no-store" });
-			if (!response.ok) return;
-			const layouts = await response.json();
-			if (!layouts || typeof layouts !== "object" || Array.isArray(layouts)) return;
-			this.layouts = layouts;
-			this.available = true;
-		} catch (error) {
-			// Local-only static hosting still uses browser storage as a fallback.
+		for (const path of [API_PATH, DEPLOYED_DEFAULT_PATH]) {
+			try {
+				const response = await fetch(path, { cache: "no-store" });
+				if (!response.ok) continue;
+				const layouts = await response.json();
+				if (!layouts || typeof layouts !== "object" || Array.isArray(layouts)) continue;
+				this.layouts = layouts;
+				// Only the Node server API can write layouts. Vercel uses the
+				// committed JSON as its read-only default.
+				this.available = path === API_PATH;
+				return;
+			} catch (error) {
+				// Try the committed production defaults after the server API.
+			}
 		}
 	}
 
