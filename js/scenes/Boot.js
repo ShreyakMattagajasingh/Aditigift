@@ -19,6 +19,10 @@ export class BootScene extends Phaser.Scene {
 		this.load.image("photoframe", "assets/bedroom/photoframe_asset.png?v=1");
 		this.load.image("aditi-diary-source", "assets/bedroom/aditidiary.png?v=1");
 		this.load.image("shreyak-diary-source", "assets/shreyakbedroom/shreyakdiary.png?v=1");
+		this.load.image("aditi-book-panel-source", "assets/bedroom/bookopen.png?v=1");
+		this.load.image("aditi-book-furniture-source", "assets/bedroom/bookopen.png?v=1");
+		this.load.image("shreyak-book-panel-source", "assets/shreyakbedroom/bookopen.png?v=1");
+		this.load.image("shreyak-book-furniture-source", "assets/shreyakbedroom/bookopen.png?v=1");
 		this.load.image("sax_carpet", "assets/insidesax/carpet_asset.png?v=1");
 		this.load.image("sax_door", "assets/insidesax/door_asset.png?v=1");
 		this.load.image("sax_elevator", "assets/insidesax/elevator_asset.png?v=1");
@@ -116,6 +120,10 @@ export class BootScene extends Phaser.Scene {
 		this._removeWarmBackdropAndTrim("aditi-diary-crop", "aditi-diary");
 		this._cropTexture("shreyak-diary-source", "shreyak-diary-crop", 220, 235, 570, 520);
 		this._removeWarmBackdropAndTrim("shreyak-diary-crop", "shreyak-diary");
+		this._cropTexture("aditi-book-panel-source", "aditi-book-panel", 250, 190, 1040, 640);
+		this._removeWarmBackdropAndTrim("aditi-book-furniture-source", "aditi-book");
+		this._cropTexture("shreyak-book-panel-source", "shreyak-book-panel", 250, 190, 1040, 640);
+		this._removeWarmBackdropAndTrim("shreyak-book-furniture-source", "shreyak-book");
 		this._removeSenchaBackdropAndTrim("inside-sencha-cupboard-source", "inside-sencha-cupboard");
 		this._cropTexture("mancala-board-source", "mancala-board-crop", 145, 285, 1250, 430);
 		this._removeWarmBackdropAndTrim("mancala-board-crop", "mancala-board");

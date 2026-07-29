@@ -2,7 +2,7 @@ import { multiplayer } from "./Multiplayer.js";
 
 const STORAGE_KEY = "aditi-inventory-v1";
 const ITEMS_PER_PAGE = 6;
-const ITEM_TEXTURES = {
+export const ITEM_TEXTURES = {
 	"Peach Ice Cream Plush": "claw-game-toy-1",
 	"Mint Ice Cream Plush": "claw-game-toy-2",
 	"Yellow Ice Cream Plush": "claw-game-toy-3",
@@ -21,6 +21,11 @@ const ITEM_TEXTURES = {
 	"M&M": "inventory-candy",
 	KitKat: "inventory-chocolate"
 };
+
+export function getInventoryItemTexture(scene, name) {
+	const texture = ITEM_TEXTURES[name] || "inventory-item";
+	return scene.textures.exists(texture) ? texture : "inventory-item";
+}
 
 function readInventory() {
 	try {
@@ -239,8 +244,7 @@ export class InventoryPanel {
 
 		visibleItems.forEach((item, index) => {
 			const rowY = top + index * 24;
-			const texture = ITEM_TEXTURES[item.name] || "inventory-item";
-			const availableTexture = this.scene.textures.exists(texture) ? texture : "inventory-item";
+			const availableTexture = getInventoryItemTexture(this.scene, item.name);
 			const icon = this.scene.add.image(left, rowY, availableTexture).setOrigin(0.5);
 			const frameWidth = Math.max(1, icon.frame.realWidth || icon.width);
 			const frameHeight = Math.max(1, icon.frame.realHeight || icon.height);

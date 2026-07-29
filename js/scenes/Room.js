@@ -4,6 +4,7 @@ import { multiplayer } from "../systems/Multiplayer.js";
 import { layoutStore } from "../systems/LayoutStore.js";
 import { RemotePlayer } from "../systems/RemotePlayer.js";
 import { ChatSystem } from "../systems/ChatSystem.js";
+import { StickerBookPanel } from "../systems/StickerBookPanel.js";
 
 const COLS = 9;
 const ROWS = 12;
@@ -54,6 +55,7 @@ export class RoomScene extends Phaser.Scene {
 		this.chatSystem = new ChatSystem(this, `Room:${this.roomOwner}`);
 		this._createUI();
 		this.inventoryPanel = new InventoryPanel(this);
+		this.stickerBookPanel = new StickerBookPanel(this);
 		this._createDevModeControls();
 		this._layoutListener = (event) => {
 			if (event.detail.sceneId !== this.layoutStorageKey) return;
@@ -214,6 +216,7 @@ export class RoomScene extends Phaser.Scene {
 		const bedTexture = this.roomOwner === "Shreyak" ? "shreyakbed" : "pinkbed";
 		const deskTexture = this.roomOwner === "Shreyak" ? "shreyakdesk" : "desk_v";
 		const diaryTexture = this.roomOwner === "Shreyak" ? "shreyak-diary" : "aditi-diary";
+		const bookTexture = this.roomOwner === "Shreyak" ? "shreyak-book" : "aditi-book";
 		const canChangeOutfit = this.activePlayer === "Aditi" && this.roomOwner === "Aditi";
 		const canBorrowHoodie = this.activePlayer === "Aditi" && this.roomOwner === "Shreyak";
 		this._place({ x: 96, y: 0, wt: 3, ht: 2, tex: "blinds", text: this._interactionText("window") });
@@ -231,6 +234,7 @@ export class RoomScene extends Phaser.Scene {
 		this._place({ id: "mirror", x: 224, y: 192, wt: 2, ht: 2, tex: "mirror", alignX: 0.5, solid: false, text: this._interactionText("mirror") });
 		this._place({ id: "photoframe", x: 240, y: 32, wt: 1, ht: 2, tex: "photoframe", alignX: 0.5, alignY: 0, solid: false, opensPhotoGallery: true });
 		this._place({ id: "diary", x: 216, y: 126, wt: 1, ht: 1, tex: diaryTexture, alignX: 0.5, alignY: 0.5, solid: false, text: this._interactionText("diary") });
+		this._place({ id: "stickerbook", x: 208, y: 144, wt: 1, ht: 1, tex: bookTexture, alignX: 0.5, alignY: 0.5, solid: false, opensStickerBook: true });
 		this._placeDoor();
 	}
 
@@ -296,7 +300,7 @@ export class RoomScene extends Phaser.Scene {
 
 	// Scales the sprite to fit inside its tile footprint (no distortion) and
 	// aligns it within that box — same approach as the Godot Furniture.gd.
-	_place({ id, x, y, wt, ht, tex, alignX = 0.5, alignY = 1, solid = true, text = "", opensOutfitMenu = false, borrowsHoodie = false, opensPhotoGallery = false }) {
+	_place({ id, x, y, wt, ht, tex, alignX = 0.5, alignY = 1, solid = true, text = "", opensOutfitMenu = false, borrowsHoodie = false, opensPhotoGallery = false, opensStickerBook = false }) {
 		id = id || tex;
 		const saved = this.savedLayout.positions[id] || {};
 		x = saved.x ?? x;
@@ -320,10 +324,10 @@ export class RoomScene extends Phaser.Scene {
 			asset.solidRect = { x, y, w, h };
 			this.solids.push(asset.solidRect);
 		}
-		if (text || opensOutfitMenu || borrowsHoodie || opensPhotoGallery) {
-			this.interactables.push({ x, y, w, h, text, opensOutfitMenu, borrowsHoodie, opensPhotoGallery });
+		if (text || opensOutfitMenu || borrowsHoodie || opensPhotoGallery || opensStickerBook) {
+			this.interactables.push({ x, y, w, h, text, opensOutfitMenu, borrowsHoodie, opensPhotoGallery, opensStickerBook });
 			asset.interactable = this.interactables[this.interactables.length - 1];
-			asset.interactionData = { text, opensOutfitMenu, borrowsHoodie, opensPhotoGallery };
+			asset.interactionData = { text, opensOutfitMenu, borrowsHoodie, opensPhotoGallery, opensStickerBook };
 		}
 		asset.solid = solid;
 		this._applyAssetScale(asset);
@@ -757,9 +761,10 @@ export class RoomScene extends Phaser.Scene {
 		const justPressed = (k) => Phaser.Input.Keyboard.JustDown(this.keys[k]);
 		const interactPressed = justPressed("E");
 		const givePressed = justPressed("G");
-		if (justPressed("Q")) this.inventoryPanel.toggle(this.activePlayer);
 		this._updateDialogueTyping(delta);
 		if (window.__roomGalleryOpen) return;
+		if (this.stickerBookPanel.update()) return;
+		if (justPressed("Q")) this.inventoryPanel.toggle(this.activePlayer);
 		if (this.inventoryPanel.update(this.activePlayer)) return;
 		const closePressed = justPressed("ESC");
 
@@ -874,6 +879,10 @@ export class RoomScene extends Phaser.Scene {
 					this.showDialogue("Aditi borrows one of Shreyak's hoodies. It is oversized, comfortable, and she is keeping it for a while.");
 				}
 				else if (hit.opensPhotoGallery) window.__openPhotoGallery?.(this.roomOwner);
+				else if (hit.opensStickerBook) {
+					if (this.activePlayer === this.roomOwner) this.stickerBookPanel.open(this.roomOwner);
+					else this.showDialogue(`${this.roomOwner}'s sticker book is personal, so you leave its pages alone.`);
+				}
 				else if (hit.scene) this.scene.start(hit.scene, hit.data || {});
 				else if (hit.text) this.showDialogue(hit.text);
 			}

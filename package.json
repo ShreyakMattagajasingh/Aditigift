@@ -7,7 +7,8 @@
     "build": "node scripts/build-static.mjs",
     "start": "node server.js",
     "dev": "node server.js",
-    "test:coop": "node tools/test-peer-coop.mjs"
+    "test:coop": "node tools/test-peer-coop.mjs",
+    "test:stickers": "node tools/test-sticker-book.mjs"
   },
   "dependencies": {
     "connect-four": "^0.0.6",

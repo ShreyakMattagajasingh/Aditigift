@@ -532,6 +532,33 @@ Client-authoritative or browser-local data:
 
 This is friendly co-op, not cheat-resistant networking.
 
+### Deployed co-op and TURN
+
+The deployed PeerJS transport needs a TURN relay when the two players are
+behind restrictive or symmetric NATs. STUN-only connections can work in local
+tests and still fail between two real networks.
+
+The browser requests short-lived ICE credentials from `GET /api/turn`. The
+Vercel function in `api/turn.js` proxies Metered without exposing the private
+API key in source control.
+
+The PeerJS signaling socket reconnects automatically. This keeps the host's
+room ID registered after a short network interruption, and joiners retry room
+lookup for up to 20 seconds while the host registration settles.
+
+Configure these Vercel environment variables for Production, Preview, and
+Development:
+
+```text
+METERED_TURN_APP=your-metered-app-name
+METERED_TURN_API_KEY=your-metered-turn-api-key
+```
+
+Create the app and free TURN credential in the Metered dashboard. After adding
+the variables, redeploy and confirm `https://<deployment>/api/turn` returns a
+JSON array containing at least one `turn:` or `turns:` URL. Do not commit the
+real API key.
+
 ## 9. HTML Overlays And Galleries
 
 Gallery and photo-booth UI live in `index.html`, outside Phaser.

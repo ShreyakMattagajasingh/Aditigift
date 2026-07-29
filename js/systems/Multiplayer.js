@@ -1,6 +1,32 @@
 import { PeerRoomEngine } from "./PeerRoomEngine.js";
 
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+const STUN_SERVERS = [
+	{ urls: "stun:stun.l.google.com:19302" },
+	{ urls: "stun:stun1.l.google.com:19302" },
+];
+
+async function createIceServers() {
+	const controller = new AbortController();
+	const timeout = window.setTimeout(() => controller.abort(), 6000);
+	try {
+		const response = await fetch("/api/turn", { cache: "no-store", signal: controller.signal });
+		if (!response.ok) throw new Error(`TURN credentials returned ${response.status}`);
+		const credentials = await response.json();
+		if (!Array.isArray(credentials)) throw new Error("TURN credentials were malformed");
+		const relayServers = credentials.filter((server) => {
+			if (!server || typeof server !== "object") return false;
+			const urls = Array.isArray(server.urls) ? server.urls : [server.urls];
+			return urls.some((url) => /^turns?:/i.test(String(url || "")));
+		});
+		if (!relayServers.length) throw new Error("TURN credentials did not include a relay");
+		return [...STUN_SERVERS, ...relayServers];
+	} catch (error) {
+		return STUN_SERVERS;
+	} finally {
+		window.clearTimeout(timeout);
+	}
+}
 
 export class MultiplayerClient {
 	constructor() {
@@ -20,6 +46,7 @@ export class MultiplayerClient {
 		this.lastSentAt = 0;
 		this.lastSceneId = "";
 		this.manualDisconnect = false;
+		this.turnAvailable = false;
 	}
 
 	static createRoomCode() {
@@ -92,52 +119,108 @@ export class MultiplayerClient {
 		});
 	}
 
-	_connectPeer() {
+	async _connectPeer() {
 		this.transport = "peer";
 		if (typeof window.Peer !== "function") {
 			return Promise.reject(new Error("The co-op library did not load. Refresh and try again."));
 		}
 		const isHost = this.role === "Aditi";
 		const hostId = `aditis-world-${this.room.toLowerCase()}`;
-		const peer = new window.Peer(isHost ? hostId : undefined);
+		const iceServers = await createIceServers();
+		this.turnAvailable = iceServers.some((server) => {
+			const urls = Array.isArray(server.urls) ? server.urls : [server.urls];
+			return urls.some((url) => /^turns?:/i.test(String(url || "")));
+		});
+		const peer = new window.Peer(isHost ? hostId : undefined, {
+			config: {
+				iceServers,
+				iceCandidatePoolSize: 6,
+				sdpSemantics: "unified-plan",
+			},
+		});
 		this.peer = peer;
 
 		return new Promise((resolve, reject) => {
 			let settled = false;
+			let retryTimer = 0;
+			let signalingRetryTimer = 0;
 			const finish = (message) => {
 				if (settled) return;
 				settled = true;
 				window.clearTimeout(timeout);
+				window.clearTimeout(retryTimer);
 				resolve(message);
 			};
 			const fail = (message) => {
 				if (settled) return;
 				settled = true;
 				window.clearTimeout(timeout);
+				window.clearTimeout(retryTimer);
 				this.disconnect();
 				reject(new Error(message));
 			};
 			const timeout = window.setTimeout(
-				() => fail(isHost ? "Could not create the co-op room." : "Could not find that room. Check the code and try again."),
-				12000,
+				() => fail(isHost
+					? "Could not create the co-op room."
+					: this.turnAvailable
+						? "Could not reach the host. Check the room code and try again."
+						: "Could not connect across these networks because the TURN relay is not configured."),
+				isHost ? 12000 : 20000,
 			);
-
-			peer.on("open", () => {
-				if (this.peer !== peer) return;
-				if (isHost) {
-					this.connected = true;
-					this._createPeerEngine();
-					const joined = { type: "joined", room: this.room, role: this.role, layouts: this.layouts, peers: [] };
-					this._handleMessage(joined);
-					finish(joined);
-					return;
-				}
+			const connectToHost = () => {
+				if (settled || isHost || this.peer !== peer || !peer.open) return;
+				const previous = this.connection;
+				this.connection = null;
+				previous?.close();
 				const connection = peer.connect(hostId, {
 					reliable: true,
 					serialization: "json",
 					metadata: { room: this.room, role: this.role },
 				});
-				this._bindPeerConnection(connection, { resolve: finish, reject: fail });
+				this._bindPeerConnection(connection, {
+					resolve: finish,
+					reject: (message) => {
+						if (message === "This room is full." || message === "Invalid room or player.") {
+							fail(message);
+							return;
+						}
+						scheduleJoin();
+					},
+				});
+			};
+			const scheduleJoin = () => {
+				if (settled || isHost || retryTimer) return;
+				retryTimer = window.setTimeout(() => {
+					retryTimer = 0;
+					connectToHost();
+				}, 900);
+			};
+			const reconnectSignaling = () => {
+				if (this.manualDisconnect || this.peer !== peer || peer.destroyed || signalingRetryTimer) return;
+				signalingRetryTimer = window.setTimeout(() => {
+					signalingRetryTimer = 0;
+					if (this.manualDisconnect || this.peer !== peer || peer.destroyed || !peer.disconnected) return;
+					try {
+						peer.reconnect();
+					} catch (error) {
+						reconnectSignaling();
+					}
+				}, 1000);
+			};
+
+			peer.on("open", () => {
+				if (this.peer !== peer) return;
+				window.clearTimeout(signalingRetryTimer);
+				signalingRetryTimer = 0;
+				if (isHost) {
+					this.connected = true;
+					if (!this.engine) this._createPeerEngine();
+					const joined = { type: "joined", room: this.room, role: this.role, layouts: this.layouts, peers: [] };
+					this._handleMessage(joined);
+					finish(joined);
+					return;
+				}
+				connectToHost();
 			});
 			peer.on("connection", (connection) => {
 				if (!isHost || this.peer !== peer) {
@@ -156,6 +239,10 @@ export class MultiplayerClient {
 			});
 			peer.on("error", (error) => {
 				if (this.peer !== peer) return;
+				if (!isHost && !settled && error.type === "peer-unavailable") {
+					scheduleJoin();
+					return;
+				}
 				const message = error.type === "unavailable-id"
 					? "That room code is already being hosted."
 					: error.type === "peer-unavailable"
@@ -164,7 +251,17 @@ export class MultiplayerClient {
 				if (!settled || !this.connected) fail(message);
 			});
 			peer.on("disconnected", () => {
-				if (!this.manualDisconnect && this.connected && !this.connection?.open) this._announce("disconnected");
+				if (this.manualDisconnect || this.peer !== peer) return;
+				reconnectSignaling();
+				if (this.connected && !this.connection?.open) this._announce("reconnecting");
+			});
+			peer.on("close", () => {
+				window.clearTimeout(signalingRetryTimer);
+				signalingRetryTimer = 0;
+				if (!this.manualDisconnect && this.peer === peer) {
+					this.connected = false;
+					this._announce("disconnected");
+				}
 			});
 		});
 	}
@@ -272,6 +369,7 @@ export class MultiplayerClient {
 		this.peer = null;
 		this.engine = null;
 		this.transport = "";
+		this.turnAvailable = false;
 		this.connected = false;
 		this.room = "";
 		this.role = "";

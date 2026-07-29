@@ -3066,6 +3066,7 @@
     const { status, room, role } = event.detail;
     if (status === "peer-joined") multiplayerHud.textContent = `ROOM ${room}  /  ${role}  /  both players online`;
     else if (status === "peer-left") multiplayerHud.textContent = `ROOM ${room}  /  ${role}  /  other player left`;
+    else if (status === "reconnecting") multiplayerHud.textContent = `ROOM ${room}  /  ${role}  /  reconnecting`;
     else if (status === "disconnected") multiplayerHud.textContent = "MULTIPLAYER DISCONNECTED";
   });
 

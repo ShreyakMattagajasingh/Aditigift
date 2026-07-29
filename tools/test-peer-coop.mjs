@@ -131,6 +131,44 @@ try {
 		host.waitFor("window.__multiplayer.connection?.open === true", "host peer connection"),
 		join.waitFor("window.__multiplayer.connected && window.__multiplayer.connection?.open === true", "join peer connection"),
 	]);
+	await host.evaluate("window.__multiplayer.peer.disconnect(); true");
+	await host.waitFor(
+		"window.__multiplayer.peer?.open && !window.__multiplayer.peer?.disconnected",
+		"host signaling reconnect",
+	);
+	const turn = await host.evaluate(`(async () => {
+		const iceServers = window.__multiplayer.peer?.options?.config?.iceServers || [];
+		const configured = iceServers.some(server => {
+			const urls = Array.isArray(server.urls) ? server.urls : [server.urls];
+			return urls.some(url => String(url || "").startsWith("turn:"));
+		});
+		const connection = new RTCPeerConnection({ iceServers, iceTransportPolicy: "relay" });
+		const errors = [];
+		connection.onicecandidateerror = event => errors.push({
+			url: event.url,
+			code: event.errorCode,
+			text: event.errorText,
+		});
+		connection.createDataChannel("turn-check");
+		const offer = await connection.createOffer();
+		const relayPromise = new Promise(resolve => {
+			const timer = setTimeout(() => resolve(false), 12000);
+			connection.onicecandidate = event => {
+				if (event.candidate?.candidate?.includes(" typ relay ")) {
+					clearTimeout(timer);
+					resolve(true);
+				} else if (!event.candidate) {
+					clearTimeout(timer);
+					resolve(false);
+				}
+			};
+		});
+		await connection.setLocalDescription(offer);
+		const relay = await relayPromise;
+		connection.close();
+		return { configured, relay, errors };
+	})()`);
+	if (turn.configured && !turn.relay) throw new Error(`TURN relay check failed: ${JSON.stringify(turn)}`);
 
 	await Promise.all([
 		host.evaluate("window.__aditiGame?.loop?.sleep(); true"),
@@ -179,6 +217,7 @@ try {
 		connectFour: true,
 		mancala: true,
 		gift: true,
+		turn,
 	}, null, 2));
 } finally {
 	host?.close();

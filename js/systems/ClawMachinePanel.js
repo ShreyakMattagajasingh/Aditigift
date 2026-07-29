@@ -90,12 +90,24 @@ export class ClawMachinePanel {
 		this.toys.forEach((toy, index) => this._fitToy(toy, index));
 		this.claw = scene.add.image(DROP_ZONE.x, DROP_ZONE.y, "claw-game-claw").setOrigin(0.5, 0).setDisplaySize(76, 168);
 		this.title = scene.add.text(275, 29, "CLAWCADE // SWEET SCOOP", { fontFamily: "monospace", fontSize: "14px", fontStyle: "bold", color: "#ffe5f1" }).setOrigin(0.5);
-		this.timerBadge = scene.add.rectangle(501, 29, 88, 26, 0x16101b, 0.98).setStrokeStyle(2, 0xffd66e, 1);
-		this.timer = scene.add.text(501, 29, "READY", { fontFamily: "monospace", fontSize: "11px", fontStyle: "bold", color: "#ffd66e" }).setOrigin(0.5);
+		this.timerBadge = scene.add.rectangle(487, 29, 62, 26, 0x16101b, 0.98).setStrokeStyle(2, 0xffd66e, 1);
+		this.timer = scene.add.text(487, 29, "READY", { fontFamily: "monospace", fontSize: "10px", fontStyle: "bold", color: "#ffd66e" }).setOrigin(0.5);
+		this.closeButton = scene.add.rectangle(542, 29, 28, 28, 0x456785, 1)
+			.setStrokeStyle(2, 0xffe5f1, 1)
+			.setInteractive({ useHandCursor: true });
+		this.closeLabel = scene.add.text(542, 29, "X", {
+			fontFamily: "monospace",
+			fontSize: "15px",
+			fontStyle: "bold",
+			color: "#ffffff",
+		}).setOrigin(0.5);
 		this.statusBar = scene.add.rectangle(320, 475, 424, 48, 0x16101b, 0.98).setStrokeStyle(2, 0xff8ec2, 1);
 		this.status = scene.add.text(320, 475, "", { fontFamily: "monospace", fontSize: "9px", color: "#fff2cb", align: "center", wordWrap: { width: 400 } }).setOrigin(0.5);
 		this.devOutline = scene.add.graphics();
-		this.container.add([this.backdrop, this.panel, this.machine, ...this.toys, this.claw, this.title, this.timerBadge, this.timer, this.statusBar, this.status, this.devOutline]);
+		this.container.add([this.backdrop, this.panel, this.machine, ...this.toys, this.claw, this.title, this.timerBadge, this.timer, this.statusBar, this.status, this.devOutline, this.closeButton, this.closeLabel]);
+		this.closeButton.on("pointerdown", () => this.close());
+		this.closeButton.on("pointerover", () => this.closeButton.setFillStyle(0x5b7d9b));
+		this.closeButton.on("pointerout", () => this.closeButton.setFillStyle(0x456785));
 
 		this._loadToyLayout();
 		this.pointerListener = (pointer) => this._selectToy(pointer);
