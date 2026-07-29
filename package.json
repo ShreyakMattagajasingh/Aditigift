@@ -6,10 +6,12 @@
   "scripts": {
     "build": "node scripts/build-static.mjs",
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test:coop": "node tools/test-peer-coop.mjs"
   },
   "dependencies": {
     "connect-four": "^0.0.6",
+    "peerjs": "^1.5.5",
     "ws": "^8.18.3"
   }
 }
