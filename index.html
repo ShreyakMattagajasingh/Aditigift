@@ -1,0 +1,3081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Gift for Aditi</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --sky-top: #5c3d2e;
+    --sky-mid: #3d281f;
+    --sky-bottom: #211612;
+    --cloud: rgba(255, 235, 208, 0.12);
+    --panel: rgba(40, 24, 18, 0.9);
+    --panel-line: rgba(255, 226, 177, 0.28);
+    --panel-shadow: rgba(0, 0, 0, 0.42);
+    --gold: #ffd67d;
+    --cream: #fff2dc;
+    --sand: #d4b895;
+    --rose: #ff91b1;
+    --button-top: #ffde84;
+    --button-bottom: #d88d3e;
+    --button-shadow: #6f3b18;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    font-family: Georgia, "Times New Roman", serif;
+    background:
+      radial-gradient(circle at 20% 12%, var(--cloud), transparent 18%),
+      radial-gradient(circle at 80% 18%, rgba(255, 205, 140, 0.12), transparent 16%),
+      linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 45%, var(--sky-bottom) 100%);
+    color: var(--cream);
+    overflow: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    opacity: 0.35;
+  }
+
+  body.playing {
+    background: #090909;
+  }
+
+  body.playing::before {
+    display: none;
+  }
+
+  .landing {
+    position: relative;
+    min-height: 100vh;
+    padding: 28px;
+    display: grid;
+    place-items: center;
+  }
+
+  .landing-shell {
+    width: min(1120px, 100%);
+    display: grid;
+    grid-template-columns: minmax(300px, 470px) minmax(340px, 1fr);
+    gap: 28px;
+    align-items: center;
+  }
+
+  .copy {
+    position: relative;
+    z-index: 1;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 14px;
+    padding: 8px 14px;
+    border: 2px solid rgba(255, 232, 196, 0.26);
+    border-radius: 999px;
+    background: rgba(37, 20, 16, 0.6);
+    color: var(--gold);
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(3rem, 6vw, 5.6rem);
+    line-height: 0.94;
+    color: var(--cream);
+    text-shadow:
+      0 3px 0 rgba(81, 40, 22, 0.9),
+      0 14px 28px rgba(0, 0, 0, 0.36);
+  }
+
+  .lede {
+    margin: 18px 0 0;
+    max-width: 26rem;
+    font-size: 1.06rem;
+    line-height: 1.6;
+    color: #f1dcc0;
+  }
+
+  .play-card {
+    margin-top: 26px;
+    width: min(100%, 360px);
+    padding: 18px;
+    border: 1px solid var(--panel-line);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255, 247, 229, 0.07), transparent 32%),
+      var(--panel);
+    box-shadow: 0 18px 40px var(--panel-shadow);
+  }
+
+  .play-card-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .character-select {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .character-option {
+    min-width: 0;
+    padding: 10px;
+    border: 2px solid rgba(255, 237, 212, 0.16);
+    border-radius: 6px;
+    background: rgba(18, 10, 8, 0.46);
+    color: var(--sand);
+    font: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+  }
+
+  .character-option.active {
+    border-color: var(--gold);
+    background: rgba(255, 214, 125, 0.12);
+    color: var(--cream);
+  }
+
+  .character-option strong,
+  .character-option span {
+    display: block;
+  }
+
+  .character-option span {
+    margin-top: 2px;
+    font-size: 0.74rem;
+    color: var(--sand);
+  }
+
+  .character-sprite {
+    width: 40px;
+    height: 48px;
+    flex: 0 0 auto;
+    background-position: top left;
+    background-size: 120px 192px;
+    image-rendering: pixelated;
+  }
+
+  .character-sprite.aditi { background-image: url("assets/characters/player_badger.png"); }
+  .character-sprite.shreyak { background-image: url("assets/characters/npc_shreyak_v4.png?v=4"); }
+
+  .sprite-badge {
+    position: relative;
+    width: 68px;
+    height: 82px;
+    flex: 0 0 auto;
+    border: 2px solid rgba(255, 237, 212, 0.18);
+    border-radius: 6px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent),
+      rgba(18, 10, 8, 0.54);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  .sprite-badge img {
+    position: absolute;
+    left: 14px;
+    top: 17px;
+    width: 40px;
+    height: 48px;
+    object-fit: none;
+    object-position: top left;
+    image-rendering: pixelated;
+  }
+
+  .play-meta strong {
+    display: block;
+    font-size: 1.35rem;
+    color: var(--cream);
+  }
+
+  .play-meta span {
+    display: block;
+    margin-top: 4px;
+    color: var(--sand);
+    line-height: 1.4;
+  }
+
+  .play-button {
+    width: 100%;
+    border: 0;
+    border-radius: 8px;
+    padding: 16px 18px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #41230d;
+    background: linear-gradient(180deg, var(--button-top), var(--button-bottom));
+    box-shadow:
+      inset 0 2px 0 rgba(255, 247, 221, 0.65),
+      0 6px 0 var(--button-shadow),
+      0 16px 26px rgba(0, 0, 0, 0.26);
+    transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+  }
+
+  .play-button:hover {
+    transform: translateY(-2px);
+    filter: saturate(1.05);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 247, 221, 0.65),
+      0 8px 0 var(--button-shadow),
+      0 20px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .play-button:active {
+    transform: translateY(4px);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 247, 221, 0.65),
+      0 2px 0 var(--button-shadow),
+      0 10px 18px rgba(0, 0, 0, 0.22);
+  }
+
+  .play-note {
+    margin: 14px 0 0;
+    font-size: 0.92rem;
+    color: var(--sand);
+    text-align: center;
+  }
+
+  .online-panel {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 237, 212, 0.16);
+  }
+
+  .online-title {
+    margin: 0 0 10px;
+    color: var(--cream);
+    font-weight: 700;
+  }
+
+  .online-actions,
+  .join-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .join-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    margin-top: 8px;
+  }
+
+  .online-button,
+  .room-code-input {
+    min-height: 42px;
+    border: 1px solid rgba(255, 214, 125, 0.44);
+    border-radius: 6px;
+    font: inherit;
+  }
+
+  .online-button {
+    padding: 9px 12px;
+    background: #38241a;
+    color: var(--cream);
+    cursor: pointer;
+  }
+
+  .online-button:hover {
+    border-color: var(--gold);
+    background: #493022;
+  }
+
+  .room-code-input {
+    width: 100%;
+    padding: 9px 12px;
+    background: #160f0c;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0;
+  }
+
+  .online-status {
+    min-height: 1.25em;
+    margin: 9px 0 0;
+    color: var(--sand);
+    font-size: 0.82rem;
+  }
+
+  .online-status.error { color: #ff9b8f; }
+
+  .multiplayer-hud {
+    position: fixed;
+    z-index: 60;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    padding: 7px 10px;
+    border: 1px solid rgba(255, 214, 125, 0.55);
+    border-radius: 6px;
+    background: rgba(26, 20, 16, 0.92);
+    color: var(--cream);
+    font-family: monospace;
+    font-size: 0.78rem;
+  }
+
+  body.playing.online .multiplayer-hud { display: block; }
+
+  .dev-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+    color: var(--sand);
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+
+  .dev-toggle input {
+    accent-color: var(--gold);
+  }
+
+  #photo-gallery {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: none;
+    place-items: center;
+    padding: 20px;
+    background: rgba(9, 6, 5, 0.82);
+  }
+
+  #photo-gallery.open {
+    display: grid;
+  }
+
+  .gallery-panel {
+    position: relative;
+    width: min(900px, 100%);
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+    padding: 24px;
+    border: 2px solid rgba(255, 214, 125, 0.42);
+    border-radius: 8px;
+    background: #251912;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  }
+
+  .gallery-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255, 242, 220, 0.3);
+    border-radius: 50%;
+    background: #3b251b;
+    color: var(--cream);
+    font: inherit;
+    font-size: 1.4rem;
+    cursor: pointer;
+  }
+
+  .gallery-panel h2 {
+    margin: 0 48px 6px 0;
+    color: var(--cream);
+  }
+
+  .gallery-kicker {
+    margin: 0 0 4px;
+    color: var(--gold);
+    font-family: monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .gallery-subtitle {
+    margin: 0 0 18px;
+    color: var(--sand);
+  }
+
+  .photo-viewer {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .gallery-nav {
+    width: 42px;
+    height: 42px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    background: #3b251b;
+    color: var(--gold);
+    font: inherit;
+    font-size: 1.4rem;
+    cursor: pointer;
+  }
+
+  .gallery-nav:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .photo-grid {
+    min-width: 0;
+  }
+
+  .photo-card {
+    position: relative;
+    padding: 12px;
+    border: 2px solid rgba(255, 214, 125, 0.55);
+    border-radius: 6px;
+    background: #17100d;
+    box-shadow: inset 0 0 0 4px rgba(78, 46, 28, 0.8), 0 12px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .photo-card::before {
+    content: "CAPTURED MEMORY";
+    display: block;
+    margin: 0 0 8px;
+    color: var(--gold);
+    font-family: monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+  }
+
+  .photo-empty {
+    min-height: 180px;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 18px;
+    border: 2px dashed rgba(255, 214, 125, 0.42);
+    background: #17100d;
+    color: var(--sand);
+    text-align: center;
+  }
+
+  .photo-card img {
+    display: block;
+    width: 100%;
+    height: min(40vh, 340px);
+    object-fit: contain;
+    image-rendering: auto;
+    background: #0d0a08;
+  }
+
+  .photo-note,
+  .photo-note-editor {
+    display: block;
+    width: 100%;
+    min-height: 54px;
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--sand);
+    font: inherit;
+    line-height: 1.35;
+    resize: vertical;
+  }
+
+  .photo-note-editor {
+    border-color: rgba(255, 214, 125, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--cream);
+  }
+
+  .photo-note-editor:focus {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+  }
+
+  .gallery-add {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 214, 125, 0.2);
+  }
+
+  .gallery-counter {
+    margin: 10px 0 0;
+    color: var(--gold);
+    font-family: monospace;
+    font-size: 0.8rem;
+    text-align: center;
+  }
+
+  .gallery-add-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .gallery-add input[type="text"] {
+    flex: 1 1 240px;
+    min-width: 0;
+    padding: 11px;
+    border: 1px solid rgba(255, 242, 220, 0.25);
+    border-radius: 5px;
+    background: #17100d;
+    color: var(--cream);
+    font: inherit;
+  }
+
+  .gallery-add input[type="file"] {
+    max-width: 100%;
+    color: var(--sand);
+  }
+
+  .gallery-add button {
+    padding: 11px 14px;
+    border: 0;
+    border-radius: 5px;
+    background: var(--button-top);
+    color: #41230d;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  #photo-booth-reveal {
+    position: fixed;
+    inset: 0;
+    z-index: 310;
+    display: none;
+    place-items: center;
+    padding: 20px;
+    background: rgba(9, 6, 5, 0.86);
+  }
+
+  #photo-booth-reveal.open {
+    display: grid;
+  }
+
+  .photo-booth-panel {
+    position: relative;
+    width: min(520px, 100%);
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+    padding: 24px;
+    border: 2px solid rgba(255, 214, 125, 0.55);
+    border-radius: 8px;
+    background: #251912;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+  }
+
+  .photo-booth-panel h2 {
+    margin: 0 48px 6px 0;
+    color: var(--cream);
+  }
+
+  .photo-booth-print {
+    margin-top: 18px;
+    padding: 10px;
+    border: 2px solid rgba(255, 214, 125, 0.55);
+    border-radius: 6px;
+    background: #100d0c;
+    box-shadow: inset 0 0 0 4px rgba(78, 46, 28, 0.8);
+  }
+
+  .photo-booth-print img {
+    display: block;
+    width: min(100%, 320px);
+    max-height: min(58vh, 600px);
+    margin: 0 auto;
+    object-fit: contain;
+    image-rendering: pixelated;
+  }
+
+  .photo-booth-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .photo-booth-actions a,
+  .photo-booth-actions button {
+    padding: 11px 14px;
+    border: 1px solid rgba(255, 214, 125, 0.6);
+    border-radius: 5px;
+    background: var(--button-top);
+    color: #41230d;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .photo-booth-actions button {
+    background: #3b251b;
+    color: var(--cream);
+  }
+
+  .art-stage {
+    position: relative;
+    min-height: 620px;
+  }
+
+  .art-panel {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--panel-line);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(255, 247, 229, 0.07), transparent 26%),
+      rgba(28, 16, 13, 0.76);
+    box-shadow: 0 26px 60px rgba(0, 0, 0, 0.34);
+    overflow: hidden;
+  }
+
+  .art-panel::before {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 34%;
+    background:
+      linear-gradient(180deg, rgba(133, 95, 58, 0), rgba(133, 95, 58, 0.22)),
+      linear-gradient(180deg, #6e9660 0%, #5a7d4f 100%);
+  }
+
+  .sun {
+    position: absolute;
+    top: 42px;
+    right: 82px;
+    width: 118px;
+    height: 118px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 235, 174, 0.96) 0%, rgba(255, 199, 118, 0.46) 48%, transparent 70%);
+    filter: blur(1px);
+  }
+
+  .cloud {
+    position: absolute;
+    height: 28px;
+    border-radius: 999px;
+    background: rgba(255, 238, 219, 0.12);
+    filter: blur(0.5px);
+  }
+
+  .cloud::before,
+  .cloud::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: inherit;
+  }
+
+  .cloud::before {
+    width: 36px;
+    height: 36px;
+    left: 12px;
+    top: -10px;
+  }
+
+  .cloud::after {
+    width: 28px;
+    height: 28px;
+    right: 18px;
+    top: -7px;
+  }
+
+  .cloud-a {
+    top: 100px;
+    left: 54px;
+    width: 110px;
+  }
+
+  .cloud-b {
+    top: 154px;
+    left: 200px;
+    width: 92px;
+  }
+
+  .pixel-art {
+    position: absolute;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    transform-origin: bottom center;
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.28));
+  }
+
+  .home {
+    right: 86px;
+    bottom: 88px;
+    width: min(42vw, 335px);
+  }
+
+  .bed {
+    left: 78px;
+    bottom: 104px;
+    width: min(26vw, 180px);
+    transform: scale(1.02);
+  }
+
+  .tree {
+    left: 36px;
+    bottom: 92px;
+    width: min(20vw, 138px);
+  }
+
+  .chair {
+    right: 46px;
+    bottom: 108px;
+    width: min(10vw, 68px);
+  }
+
+  .sunchair {
+    right: 152px;
+    bottom: 74px;
+    width: min(15vw, 94px);
+  }
+
+  .hero-sprite {
+    position: absolute;
+    bottom: 98px;
+    left: 50%;
+    width: 40px;
+    height: 48px;
+    margin-left: -20px;
+    background-image: url("assets/characters/player_badger.png");
+    background-repeat: no-repeat;
+    background-position: top left;
+    background-size: 120px 192px;
+    image-rendering: pixelated;
+    transform: scale(3);
+    filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.35));
+    animation: sprite-bob 1.4s ease-in-out infinite;
+  }
+
+  .hint-bar {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 231, 191, 0.16);
+    border-radius: 8px;
+    background: rgba(20, 11, 9, 0.64);
+    color: #f1d8b8;
+    font-size: 0.92rem;
+  }
+
+  #game-wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    place-items: center;
+    overflow: hidden;
+    background-color: #9da58a;
+    background-image:
+      linear-gradient(rgba(29, 38, 15, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(29, 38, 15, 0.055) 1px, transparent 1px);
+    background-size: 8px 8px;
+  }
+
+  #game-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    z-index: 0;
+    border: 4px solid #263014;
+    box-shadow:
+      inset 0 0 0 3px #6c7657,
+      7px 7px 0 rgba(38, 48, 20, 0.32);
+    pointer-events: none;
+  }
+
+  #game-wrap::after {
+    content: "";
+    position: absolute;
+    top: 24px;
+    left: 26px;
+    z-index: 0;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #101708;
+    background: #d7bd58;
+    box-shadow:
+      18px 0 0 -2px #3f5f79,
+      18px 0 0 0 #101708,
+      36px 0 0 -2px #9b473e,
+      36px 0 0 0 #101708;
+    pointer-events: none;
+  }
+
+  body.playing .landing {
+    display: none;
+  }
+
+  body.playing #game-wrap {
+    display: flex;
+  }
+
+  #game-wrap canvas {
+    position: fixed !important;
+    top: 50vh !important;
+    left: 50vw !important;
+    z-index: 1;
+    display: block;
+    margin: 0 !important;
+    max-width: 100vw;
+    max-height: 100vh;
+    border: 4px solid #263014;
+    box-shadow:
+      0 0 0 3px #7a8465,
+      8px 8px 0 rgba(38, 48, 20, 0.38);
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%) !important;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  #game-wrap canvas.game-portrait {
+    width: min(100vw, 75vh) !important;
+    height: min(100vh, 133.333vw) !important;
+  }
+
+  #game-wrap canvas.game-landscape {
+    width: min(100vw, 166.667vh) !important;
+    height: min(100vh, 60vw) !important;
+  }
+
+  #game-wrap canvas.game-standard {
+    width: min(100vw, 125vh) !important;
+    height: min(100vh, 80vw) !important;
+  }
+
+  #game-wrap canvas.game-widescreen {
+    width: min(100vw, 177.778vh) !important;
+    height: min(100vh, 56.25vw) !important;
+  }
+
+  #game-wrap canvas.game-full-landscape {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none;
+    max-height: none;
+  }
+
+    @keyframes sprite-bob {
+      0%, 100% { transform: scale(3) translateY(0); }
+      50% { transform: scale(3) translateY(-8px); }
+  }
+
+  @media (max-width: 960px) {
+    .landing {
+      overflow-y: auto;
+      overflow-x: hidden;
+      align-items: start;
+    }
+
+    .landing-shell {
+      grid-template-columns: 1fr;
+      gap: 22px;
+      padding: 22px 0 40px;
+    }
+
+    .art-stage {
+      min-height: 460px;
+      order: -1;
+    }
+
+    .home {
+      right: 30px;
+      width: 250px;
+    }
+
+    .bed {
+      left: 40px;
+      width: 135px;
+    }
+
+    .tree {
+      left: 14px;
+      width: 104px;
+    }
+
+    .chair {
+      right: 18px;
+      width: 56px;
+    }
+
+    .sunchair {
+      right: 110px;
+      width: 80px;
+    }
+
+    .hero-sprite {
+      transform: scale(2.6);
+    }
+
+    @keyframes sprite-bob {
+      0%, 100% { transform: scale(2.6) translateY(0); }
+      50% { transform: scale(2.6) translateY(-8px); }
+    }
+  }
+
+  @media (max-width: 640px) {
+    .landing {
+      padding: 16px;
+    }
+
+    .eyebrow {
+      font-size: 0.72rem;
+    }
+
+    h1 {
+      font-size: 2.7rem;
+    }
+
+    .lede {
+      font-size: 0.98rem;
+    }
+
+    .play-card {
+      width: 100%;
+    }
+
+    .art-stage {
+      min-height: 380px;
+    }
+
+    .hero-sprite {
+      bottom: 84px;
+      transform: scale(2.2);
+    }
+
+    .hint-bar {
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      font-size: 0.8rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    @keyframes sprite-bob {
+      0%, 100% { transform: scale(2.2) translateY(0); }
+      50% { transform: scale(2.2) translateY(-6px); }
+    }
+  }
+
+  /* Retro system-menu landing */
+  body:not(.playing) {
+    background: #9da58a;
+    color: #1d260f;
+    font-family: "Courier New", Consolas, monospace;
+  }
+
+  body:not(.playing)::before {
+    display: block;
+    background:
+      linear-gradient(rgba(29, 38, 15, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(29, 38, 15, 0.035) 1px, transparent 1px);
+    background-size: 8px 8px;
+    opacity: 1;
+  }
+
+  body:not(.playing) .landing {
+    min-height: 100vh;
+    padding: 22px;
+  }
+
+  body.playing {
+    background: #9da58a;
+  }
+
+  body.playing .multiplayer-hud {
+    border: 3px solid #263014;
+    border-radius: 0;
+    background: #aeb597;
+    color: #263014;
+    font-family: "Courier New", Consolas, monospace;
+    font-weight: 700;
+    box-shadow: 4px 4px 0 #5f694a;
+  }
+
+  body:not(.playing) .landing-shell {
+    width: min(1180px, 100%);
+    grid-template-columns: minmax(340px, 430px) minmax(420px, 1fr);
+    gap: clamp(28px, 4vw, 52px);
+    align-items: center;
+  }
+
+  body:not(.playing) .copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  body:not(.playing) .eyebrow {
+    width: max-content;
+    margin: 0 0 10px;
+    padding: 4px 7px;
+    border: 0;
+    border-radius: 0;
+    background: #273116;
+    color: #d8c56f;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    box-shadow: 3px 3px 0 #64704f;
+  }
+
+  body:not(.playing) h1 {
+    margin: 0;
+    max-width: 410px;
+    font-family: "Courier New", Consolas, monospace;
+    font-size: clamp(3.15rem, 6vw, 5.25rem);
+    font-weight: 900;
+    line-height: 0.88;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: #20280f;
+    text-shadow:
+      3px 0 #697254,
+      0 3px #697254,
+      4px 4px 0 #c0c6aa;
+  }
+
+  body:not(.playing) .title-line {
+    display: block;
+  }
+
+  body:not(.playing) .title-heart {
+    color: #8f4d56;
+    text-shadow: 2px 0 #697254, 0 2px #c0c6aa;
+  }
+
+  body:not(.playing) .title-edition {
+    margin-top: 8px;
+    color: #3f5f79;
+    font-size: 0.27em;
+    line-height: 1.1;
+    letter-spacing: 0.06em;
+    text-shadow: 1px 0 #697254, 0 1px #c0c6aa;
+  }
+
+  body:not(.playing) .lede {
+    max-width: 410px;
+    margin: 18px 0 0;
+    padding: 10px 12px;
+    border-left: 6px solid #3f5f79;
+    background: rgba(214, 218, 190, 0.42);
+    color: #29331a;
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  body:not(.playing) .play-card {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    border: 4px solid #283216;
+    border-radius: 0;
+    background: #aeb597;
+    box-shadow:
+      inset 0 0 0 2px #7d8669,
+      7px 7px 0 #626c4d;
+  }
+
+  .section-label,
+  .preview-header {
+    font-family: "Courier New", Consolas, monospace;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .section-label {
+    margin: 0 0 7px;
+    color: #303a1e;
+    font-size: 0.72rem;
+  }
+
+  body:not(.playing) .character-select {
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-bottom: 12px;
+    border: 3px solid #283216;
+    background: #899174;
+  }
+
+  body:not(.playing) .character-option {
+    min-height: 66px;
+    padding: 7px 9px;
+    gap: 8px;
+    border: 0;
+    border-right: 3px solid #283216;
+    border-radius: 0;
+    background: #aeb597;
+    color: #4f5940;
+    font-family: "Courier New", Consolas, monospace;
+  }
+
+  body:not(.playing) .character-option:last-child {
+    border-right: 0;
+  }
+
+  body:not(.playing) .character-option:hover {
+    background: #bec4a8;
+  }
+
+  body:not(.playing) .character-option.active {
+    border-color: #283216;
+    background: #263014;
+    color: #d9dfbf;
+    box-shadow: inset 0 -5px 0 #d5b84f;
+  }
+
+  body:not(.playing) .character-option strong {
+    color: inherit;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+  }
+
+  body:not(.playing) .character-option span {
+    margin-top: 2px;
+    color: inherit;
+    font-size: 0.62rem;
+    line-height: 1.25;
+  }
+
+  body:not(.playing) .character-sprite {
+    width: 40px;
+    height: 48px;
+    background-color: #899174;
+    outline: 2px solid currentColor;
+    outline-offset: 1px;
+  }
+
+  body:not(.playing) .play-button {
+    min-height: 48px;
+    padding: 10px 14px;
+    border: 3px solid #20290f;
+    border-radius: 0;
+    background: #d7bd58;
+    color: #20290f;
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 0.92rem;
+    font-weight: 900;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 #5f684a;
+    transition: transform 80ms linear, box-shadow 80ms linear, background 80ms linear;
+  }
+
+  body:not(.playing) .play-button:hover {
+    transform: translate(-1px, -1px);
+    background: #ead36f;
+    filter: none;
+    box-shadow: 5px 5px 0 #5f684a;
+  }
+
+  body:not(.playing) .play-button:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 #5f684a;
+  }
+
+  body:not(.playing) button:focus-visible,
+  body:not(.playing) input:focus-visible {
+    outline: 3px solid #3f5f79;
+    outline-offset: 2px;
+  }
+
+  body:not(.playing) .play-note {
+    margin: 10px 0 0;
+    color: #3c472b;
+    font-size: 0.68rem;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  body:not(.playing) .online-panel {
+    margin-top: 12px;
+    padding-top: 11px;
+    border-top: 3px dashed #6d7659;
+  }
+
+  body:not(.playing) .online-title {
+    margin: 0 0 8px;
+    color: #303a1e;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+
+  body:not(.playing) .online-actions,
+  body:not(.playing) .join-row {
+    gap: 6px;
+  }
+
+  body:not(.playing) .online-button,
+  body:not(.playing) .room-code-input {
+    min-height: 38px;
+    border: 3px solid #2b3519;
+    border-radius: 0;
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  body:not(.playing) .online-button {
+    padding: 7px 9px;
+    background: #2a3418;
+    color: #cfd5b4;
+  }
+
+  body:not(.playing) .online-button:hover {
+    border-color: #2b3519;
+    background: #3f5f79;
+    color: #edf0dc;
+  }
+
+  body:not(.playing) .room-code-input {
+    padding: 7px 10px;
+    background: #bfc5a8;
+    color: #253015;
+    outline: 0;
+  }
+
+  body:not(.playing) .room-code-input:focus {
+    border-color: #3f5f79;
+    box-shadow: inset 0 0 0 2px #7e9aaf;
+  }
+
+  body:not(.playing) .room-code-input::placeholder {
+    color: #707961;
+    opacity: 1;
+  }
+
+  body:not(.playing) .online-status {
+    min-height: 16px;
+    margin: 7px 0 0;
+    color: #3f5f79;
+    font-size: 0.66rem;
+    font-weight: 700;
+  }
+
+  body:not(.playing) .online-status.error {
+    color: #8f3931;
+  }
+
+  body:not(.playing) .dev-toggle {
+    justify-content: flex-start;
+    width: max-content;
+    margin-top: 7px;
+    color: #394426;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  body:not(.playing) .dev-toggle input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #3f5f79;
+  }
+
+  body:not(.playing) .art-stage {
+    width: 100%;
+    height: min(62vh, 620px);
+    min-height: 520px;
+  }
+
+  body:not(.playing) .art-panel {
+    border: 5px solid #263014;
+    border-radius: 0;
+    background: #aeb597;
+    box-shadow:
+      inset 0 0 0 3px #687254,
+      9px 9px 0 #5f694a;
+  }
+
+  body:not(.playing) .art-panel::before {
+    inset: 22% 0 0;
+    height: auto;
+    background: #7c9365;
+    border-top: 5px solid #263014;
+  }
+
+  body:not(.playing) .art-panel::after {
+    content: "";
+    position: absolute;
+    inset: 42px 16px 58px;
+    z-index: 20;
+    border: 2px solid rgba(38, 48, 20, 0.35);
+    pointer-events: none;
+  }
+
+  .preview-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    height: 42px;
+    padding: 0 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 5px solid #263014;
+    background: #263014;
+    color: #d7bd58;
+    font-size: 0.72rem;
+  }
+
+  .preview-lights {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .preview-light {
+    width: 9px;
+    height: 9px;
+    display: block;
+    background: #72805e;
+    border: 2px solid #101708;
+  }
+
+  .preview-light:nth-child(1) { background: #d7bd58; }
+  .preview-light:nth-child(2) { background: #3f5f79; }
+  .preview-light:nth-child(3) { background: #9b473e; }
+
+  body:not(.playing) .sun,
+  body:not(.playing) .cloud {
+    display: none;
+  }
+
+  body:not(.playing) .pixel-art {
+    z-index: 4;
+    filter: drop-shadow(5px 6px 0 rgba(38, 48, 20, 0.28));
+  }
+
+  body:not(.playing) .home {
+    right: 34px;
+    bottom: 112px;
+    width: min(35vw, 290px);
+  }
+
+  body:not(.playing) .bed {
+    left: 46px;
+    bottom: 126px;
+    width: min(22vw, 156px);
+  }
+
+  body:not(.playing) .tree {
+    left: 24px;
+    bottom: 116px;
+    width: min(15vw, 105px);
+  }
+
+  body:not(.playing) .chair {
+    right: 24px;
+    bottom: 124px;
+    width: min(8vw, 56px);
+  }
+
+  body:not(.playing) .sunchair {
+    right: 116px;
+    bottom: 96px;
+    width: min(11vw, 82px);
+  }
+
+  body:not(.playing) .hero-sprite {
+    z-index: 10;
+    bottom: 126px;
+    transform: scale(3);
+    filter: drop-shadow(5px 7px 0 rgba(38, 48, 20, 0.35));
+  }
+
+  body:not(.playing) .hint-bar {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    min-height: 50px;
+    padding: 0;
+    gap: 0;
+    border: 0;
+    border-top: 5px solid #263014;
+    border-radius: 0;
+    background: #aeb597;
+    color: #283216;
+    font-family: "Courier New", Consolas, monospace;
+    font-size: 0.67rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  body:not(.playing) .hint-bar span {
+    min-width: 0;
+    flex: 1;
+    padding: 15px 8px 12px;
+    border-right: 3px solid #263014;
+    text-align: center;
+  }
+
+  body:not(.playing) .hint-bar span:last-child {
+    border-right: 0;
+    background: #3f5f79;
+    color: #edf0dc;
+  }
+
+  /* Keep the complete start screen on a normal browser viewport at 100% zoom. */
+  @media (min-width: 961px) and (max-height: 950px) {
+    body:not(.playing) .landing {
+      padding: 12px 18px;
+    }
+
+    body:not(.playing) .landing-shell {
+      width: min(1080px, 100%);
+      grid-template-columns: minmax(310px, 390px) minmax(400px, 1fr);
+      gap: clamp(20px, 3vw, 34px);
+    }
+
+    body:not(.playing) .eyebrow {
+      margin-bottom: 6px;
+      font-size: 0.64rem;
+    }
+
+    body:not(.playing) h1 {
+      max-width: 360px;
+      font-size: clamp(3.3rem, 5vw, 4.35rem);
+    }
+
+    body:not(.playing) .title-edition {
+      margin-top: 4px;
+    }
+
+    body:not(.playing) .lede {
+      margin-top: 10px;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+
+    body:not(.playing) .play-card {
+      margin-top: 10px;
+      padding: 10px;
+      border-width: 3px;
+      box-shadow: inset 0 0 0 2px #7d8669, 5px 5px 0 #626c4d;
+    }
+
+    body:not(.playing) .section-label,
+    body:not(.playing) .online-title {
+      margin-bottom: 5px;
+      font-size: 0.64rem;
+    }
+
+    body:not(.playing) .character-select {
+      margin-bottom: 8px;
+    }
+
+    body:not(.playing) .character-option {
+      min-height: 58px;
+      padding: 5px 7px;
+    }
+
+    body:not(.playing) .character-sprite {
+      width: 34px;
+      height: 41px;
+    }
+
+    body:not(.playing) .play-button {
+      min-height: 40px;
+      padding: 7px 10px;
+      font-size: 0.82rem;
+    }
+
+    body:not(.playing) .play-note {
+      margin-top: 7px;
+      font-size: 0.6rem;
+    }
+
+    body:not(.playing) .online-panel {
+      margin-top: 8px;
+      padding-top: 8px;
+    }
+
+    body:not(.playing) .online-button,
+    body:not(.playing) .room-code-input {
+      min-height: 32px;
+      font-size: 0.62rem;
+    }
+
+    body:not(.playing) .dev-toggle {
+      margin-top: 5px;
+      font-size: 0.6rem;
+    }
+
+    body:not(.playing) .art-stage {
+      height: min(62vh, 530px);
+      min-height: 420px;
+    }
+
+    body:not(.playing) .preview-header {
+      height: 34px;
+      font-size: 0.62rem;
+    }
+
+    body:not(.playing) .hint-bar {
+      min-height: 42px;
+      font-size: 0.6rem;
+    }
+
+    body:not(.playing) .hint-bar span {
+      padding: 11px 6px 9px;
+    }
+  }
+
+  @media (max-width: 960px) {
+    body:not(.playing) {
+      overflow-y: auto;
+    }
+
+    body:not(.playing) .landing {
+      align-items: start;
+      overflow: visible;
+      padding: 18px;
+    }
+
+    body:not(.playing) .landing-shell {
+      width: 100%;
+      min-width: 0;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 26px;
+      padding: 12px 0 34px;
+    }
+
+    body:not(.playing) .copy {
+      width: min(620px, 100%);
+      min-width: 0;
+      margin: 0 auto;
+    }
+
+    body:not(.playing) .art-stage {
+      width: min(720px, 100%);
+      min-width: 0;
+      min-height: 520px;
+      margin: 0 auto;
+      order: 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    body:not(.playing) .landing {
+      padding: 12px;
+    }
+
+    body:not(.playing) h1 {
+      max-width: 100%;
+      font-size: 2.55rem;
+      line-height: 0.94;
+    }
+
+    body:not(.playing) .lede {
+      font-size: 0.78rem;
+    }
+
+    body:not(.playing) .play-card {
+      width: calc(100% - 6px);
+      padding: 11px;
+      box-shadow: 5px 5px 0 #626c4d;
+    }
+
+    body:not(.playing) .character-select {
+      grid-template-columns: 1fr;
+    }
+
+    body:not(.playing) .character-option {
+      border-right: 0;
+      border-bottom: 3px solid #283216;
+    }
+
+    body:not(.playing) .character-option:last-child {
+      border-bottom: 0;
+    }
+
+    body:not(.playing) .online-actions {
+      grid-template-columns: 1fr;
+    }
+
+    body:not(.playing) .join-row {
+      grid-template-columns: minmax(0, 1fr) 58px;
+    }
+
+    body:not(.playing) .art-stage {
+      min-height: 400px;
+    }
+
+    body:not(.playing) .home {
+      right: 18px;
+      bottom: 78px;
+      width: 215px;
+    }
+
+    body:not(.playing) .bed {
+      left: 22px;
+      bottom: 88px;
+      width: 105px;
+    }
+
+    body:not(.playing) .tree {
+      left: 8px;
+      bottom: 80px;
+      width: 72px;
+    }
+
+    body:not(.playing) .chair {
+      right: 9px;
+      bottom: 86px;
+      width: 42px;
+    }
+
+    body:not(.playing) .sunchair {
+      right: 73px;
+      bottom: 66px;
+      width: 58px;
+    }
+
+    body:not(.playing) .hero-sprite {
+      bottom: 88px;
+      transform: scale(2.2);
+    }
+
+    body:not(.playing) .hint-bar {
+      min-height: 44px;
+      flex-wrap: nowrap;
+      font-size: 0.55rem;
+    }
+
+    body:not(.playing) .hint-bar span {
+      padding: 12px 4px 10px;
+    }
+  }
+  #music-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 110;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(14, 18, 8, 0.78);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 140ms ease;
+  }
+
+  #music-panel.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .music-dialog {
+    position: relative;
+    width: min(620px, 100%);
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+    padding: 30px;
+    border: 4px solid #1f2d0d;
+    background: #aab394;
+    color: #1f2d0d;
+    box-shadow: 10px 10px 0 rgba(31, 45, 13, 0.72);
+    image-rendering: pixelated;
+  }
+
+  .music-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 38px;
+    height: 34px;
+    border: 3px solid #1f2d0d;
+    background: #d7bf55;
+    color: #1f2d0d;
+    font: 700 1rem monospace;
+    cursor: pointer;
+  }
+
+  .music-kicker,
+  .music-help,
+  .music-status {
+    margin: 0;
+    font: 700 0.78rem/1.5 monospace;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .music-kicker { color: #496a37; }
+  .music-dialog h2 { margin: 10px 48px 6px 0; font: 700 clamp(1.8rem, 5vw, 2.7rem)/1 monospace; }
+  .music-subtitle { margin: 0 0 20px; font: 0.95rem/1.5 monospace; }
+
+  #music-embed {
+    min-height: 152px;
+    border: 3px solid #1f2d0d;
+    background: #17200d;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+
+  #music-embed audio { display: block; width: 100%; margin-top: 10px; accent-color: #d7bf55; }
+  .music-now-playing { width: 100%; padding: 14px; display: grid; grid-template-columns: 72px 1fr; gap: 12px; align-items: center; color: #f0e7bd; }
+  .music-now-playing img { width: 72px; height: 72px; object-fit: cover; border: 2px solid #d7bf55; image-rendering: auto; }
+  .music-now-playing strong, .music-now-playing span { display: block; font-family: monospace; }
+  .music-now-playing strong { font-size: 0.9rem; }
+  .music-now-playing span { margin-top: 4px; color: #aab394; font-size: 0.72rem; }
+  .music-now-playing audio { grid-column: 1 / -1; }
+  .music-empty { margin: 24px; color: #d7bf55; text-align: center; font: 0.82rem/1.5 monospace; }
+  .music-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 16px; }
+  .music-form input, .music-form button, .music-file-label, .music-trending { min-height: 44px; border: 3px solid #1f2d0d; border-radius: 0; font: 0.78rem monospace; }
+  .music-form input { min-width: 0; padding: 8px; background: #c2c8ac; color: #1f2d0d; }
+  .music-form button { padding: 8px 14px; background: #d7bf55; color: #1f2d0d; cursor: pointer; font-weight: 700; }
+  .music-form button:hover, .music-close:hover { filter: brightness(1.08); }
+  .music-results { max-height: 250px; margin-top: 10px; border: 3px solid #1f2d0d; background: #899576; overflow-y: auto; }
+  .music-result { width: 100%; min-height: 62px; padding: 7px; border: 0; border-bottom: 2px solid #465332; background: transparent; color: #1f2d0d; display: grid; grid-template-columns: 48px 1fr auto; gap: 10px; align-items: center; text-align: left; cursor: pointer; }
+  .music-result:last-child { border-bottom: 0; }
+  .music-result:hover, .music-result:focus-visible { background: #c2c8ac; outline: none; }
+  .music-result img { width: 48px; height: 48px; object-fit: cover; background: #1f2d0d; image-rendering: auto; }
+  .music-result strong, .music-result span { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; }
+  .music-result strong { font-size: 0.76rem; }
+  .music-result span { margin-top: 3px; font-size: 0.66rem; color: #3f4c2a; }
+  .music-result time { font: 0.66rem monospace; }
+  .music-trending { width: 100%; margin-top: 8px; padding: 8px 14px; background: #496a37; color: #f0e7bd; cursor: pointer; font-weight: 700; }
+  .music-file-label {
+    display: grid;
+    place-items: center;
+    margin-top: 8px;
+    padding: 8px 14px;
+    background: #899576;
+    color: #1f2d0d;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .music-file-label:hover { filter: brightness(1.08); }
+  .music-file-label input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .music-status { min-height: 1.5em; margin-top: 12px; color: #496a37; }
+  .music-status.error { color: #7b2d2d; }
+  .music-help { margin-top: 14px; color: #3f4c2a; font-size: 0.68rem; text-transform: none; letter-spacing: 0; }
+
+  @media (max-width: 560px) {
+    #music-panel { padding: 12px; }
+    .music-dialog { padding: 22px 16px 18px; }
+    .music-form { grid-template-columns: 1fr; }
+  }
+
+  #chat-entry {
+    position: fixed;
+    left: 50%;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    z-index: 108;
+    width: min(680px, calc(100vw - 28px));
+    padding: 8px;
+    border: 3px solid #d7bf55;
+    background: rgba(23, 32, 13, 0.97);
+    box-shadow: 6px 6px 0 rgba(10, 13, 6, 0.7);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 14px);
+    transition: opacity 100ms ease, transform 100ms ease;
+  }
+
+  #chat-entry.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+  }
+
+  #chat-entry form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+
+  #chat-entry input,
+  #chat-entry button {
+    min-height: 42px;
+    border: 2px solid #899576;
+    border-radius: 0;
+    font: 700 0.82rem monospace;
+  }
+
+  #chat-entry input {
+    min-width: 0;
+    padding: 8px 10px;
+    background: #f0e7bd;
+    color: #1f2d0d;
+    outline: none;
+  }
+
+  #chat-entry input:focus { border-color: #d7bf55; }
+  #chat-entry button { padding: 8px 14px; background: #d7bf55; color: #1f2d0d; cursor: pointer; }
+  .chat-entry-hint { margin: 6px 2px 0; color: #aab394; font: 0.66rem monospace; }
+
+  @media (max-width: 520px) {
+    #chat-entry form { grid-template-columns: 1fr; }
+    #chat-entry button { display: none; }
+  }
+
+  body:not(.playing) .saxony-building {
+    position: absolute;
+    left: 50%;
+    bottom: 112px;
+    z-index: 5;
+    width: min(72%, 520px);
+    transform: translateX(-50%);
+    image-rendering: pixelated;
+    filter: drop-shadow(6px 8px 0 rgba(38, 48, 20, 0.28));
+  }
+
+  body:not(.playing) .preview-tree {
+    position: absolute;
+    bottom: 115px;
+    z-index: 7;
+    width: 62px;
+    image-rendering: pixelated;
+    filter: drop-shadow(4px 6px 0 rgba(38, 48, 20, 0.28));
+  }
+
+  body:not(.playing) .preview-tree-1 { left: 4%; }
+  body:not(.playing) .preview-tree-2 { left: 13%; }
+  body:not(.playing) .preview-tree-3 { left: 23%; }
+  body:not(.playing) .preview-tree-4 { right: 23%; }
+  body:not(.playing) .preview-tree-5 { right: 13%; }
+  body:not(.playing) .preview-tree-6 { right: 4%; }
+
+  .preview-character {
+    position: absolute;
+    bottom: 112px;
+    z-index: 12;
+    width: 40px;
+    height: 48px;
+    background-repeat: no-repeat;
+    background-position: top left;
+    background-size: 120px 192px;
+    image-rendering: pixelated;
+    filter: drop-shadow(4px 7px 0 rgba(38, 48, 20, 0.35));
+    animation: preview-player-bob 1.35s ease-in-out infinite;
+    will-change: translate;
+  }
+
+  .preview-character.selected {
+    filter: drop-shadow(4px 7px 0 rgba(38, 48, 20, 0.35)) drop-shadow(0 0 5px rgba(215, 189, 88, 0.72));
+  }
+
+  @keyframes preview-player-bob {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -7px; }
+  }
+
+  body:not(.playing) .preview-character-aditi {
+    left: 28%;
+    background-image: url("assets/characters/player_badger.png");
+    transform: scale(2.6);
+  }
+
+  body:not(.playing) .preview-character-shreyak {
+    right: 25%;
+    background-image: url("assets/characters/npc_shreyak_v4.png?v=4");
+    transform: scale(2.6);
+  }
+
+  body:not(.playing) .preview-character-aditi.selected { transform: scale(2.6); }
+  body:not(.playing) .preview-character-shreyak.selected { transform: scale(2.6); }
+
+  body:not(.playing) .preview-name {
+    position: absolute;
+    bottom: 76px;
+    z-index: 15;
+    padding: 4px 7px;
+    border: 2px solid #283216;
+    background: #263014;
+    color: #d7bd58;
+    font: 700 0.62rem "Courier New", Consolas, monospace;
+    text-transform: uppercase;
+  }
+
+  body:not(.playing) .preview-name-aditi { left: 24%; }
+  body:not(.playing) .preview-name-shreyak { right: 21%; }
+  body:not(.playing) .preview-name.selected {
+    background: #496a37;
+    color: #e0d28a;
+    border-color: #d7bd58;
+    box-shadow: 2px 2px 0 rgba(95, 104, 74, 0.8);
+  }
+
+  @media (max-width: 640px) {
+    body:not(.playing) .saxony-building { width: 76%; bottom: 112px; }
+    body:not(.playing) .preview-tree { width: 42px; bottom: 114px; }
+    body:not(.playing) .preview-character { transform: scale(2.1); }
+    body:not(.playing) .preview-character-aditi { left: 18%; }
+    body:not(.playing) .preview-character-shreyak { right: 16%; }
+    body:not(.playing) .preview-name { font-size: 0.54rem; }
+    body:not(.playing) .preview-name-aditi { left: 15%; }
+    body:not(.playing) .preview-name-shreyak { right: 13%; }
+    body:not(.playing) .preview-character-aditi.selected { transform: scale(2.1); }
+    body:not(.playing) .preview-character-shreyak.selected { transform: scale(2.1); }
+  }
+
+  body:not(.playing) .landing-settings {
+    position: fixed;
+    top: 22px;
+    right: 24px;
+    z-index: 20;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 3px solid #283216;
+    border-radius: 0;
+    background: #d7bd58;
+    color: #20290f;
+    box-shadow: 4px 4px 0 #5f684a;
+    cursor: pointer;
+    font: 700 0.72rem "Courier New", Consolas, monospace;
+    text-transform: uppercase;
+  }
+
+  body:not(.playing) .landing-settings:hover {
+    background: #ead36f;
+    transform: translate(-1px, -1px);
+  }
+
+  #settings-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: none;
+    place-items: center;
+    padding: 20px;
+    background: rgba(18, 24, 10, 0.72);
+  }
+
+  #settings-panel.open { display: grid; }
+
+  .settings-dialog {
+    position: relative;
+    width: min(760px, 100%);
+    max-height: min(720px, 92vh);
+    overflow-y: auto;
+    padding: 24px;
+    border: 4px solid #283216;
+    background: #aeb597;
+    color: #263014;
+    box-shadow: 8px 8px 0 #4d5738, inset 0 0 0 3px #7d8669;
+  }
+
+  .settings-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
+    border: 3px solid #283216;
+    background: #263014;
+    color: #d7bd58;
+    cursor: pointer;
+    font: 700 1rem "Courier New", Consolas, monospace;
+  }
+
+  .settings-kicker {
+    margin: 0 0 8px;
+    color: #496a37;
+    font: 700 0.72rem "Courier New", Consolas, monospace;
+    text-transform: uppercase;
+  }
+
+  .settings-dialog h2 {
+    margin: 0 52px 8px 0;
+    color: #20280f;
+    font: 900 clamp(1.65rem, 4vw, 2.5rem)/1 "Courier New", Consolas, monospace;
+    text-transform: uppercase;
+  }
+
+  .settings-subtitle {
+    margin: 0 0 18px;
+    color: #3c472b;
+    font: 0.78rem/1.45 "Courier New", Consolas, monospace;
+  }
+
+  .control-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .control-group {
+    padding: 12px;
+    border: 3px solid #283216;
+    background: #c2c8ac;
+  }
+
+  .control-group h3 {
+    margin: 0 0 9px;
+    padding-bottom: 6px;
+    border-bottom: 2px dashed #6d7659;
+    color: #303a1e;
+    font: 700 0.74rem "Courier New", Consolas, monospace;
+    text-transform: uppercase;
+  }
+
+  .control-row {
+    display: grid;
+    grid-template-columns: minmax(92px, 0.7fr) 1fr;
+    gap: 10px;
+    align-items: baseline;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(70, 83, 50, 0.28);
+    font: 0.7rem/1.35 "Courier New", Consolas, monospace;
+  }
+
+  .control-row:last-child { border-bottom: 0; }
+
+  .control-key {
+    color: #20290f;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .control-action { color: #465332; }
+
+  .settings-footnote {
+    margin: 16px 0 0;
+    color: #496a37;
+    font: 700 0.68rem/1.45 "Courier New", Consolas, monospace;
+  }
+
+  .rulebook-open,
+  .back-to-menu {
+    width: 100%;
+    min-height: 42px;
+    margin-top: 16px;
+    border: 3px solid #283216;
+    background: #3f5f79;
+    color: #edf0dc;
+    cursor: pointer;
+    font: 700 0.75rem "Courier New", Consolas, monospace;
+    text-transform: uppercase;
+    box-shadow: 3px 3px 0 #5f684a;
+  }
+
+  .rulebook-open {
+    background: #d7bd58;
+    color: #20290f;
+  }
+
+  .rulebook-open:hover { background: #ead36f; }
+  .back-to-menu:hover { background: #496a37; }
+
+  #rulebook-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 140;
+    display: none;
+    place-items: center;
+    padding: 20px;
+    background: rgba(18, 24, 10, 0.86);
+  }
+
+  #rulebook-panel.open { display: grid; }
+
+  .rulebook-dialog {
+    position: relative;
+    width: min(900px, 100%);
+    max-height: min(780px, 92vh);
+    overflow-y: auto;
+    padding: 24px;
+    border: 5px solid #263014;
+    background:
+      linear-gradient(rgba(38, 48, 20, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(38, 48, 20, 0.045) 1px, transparent 1px),
+      #aeb597;
+    background-size: 8px 8px;
+    color: #263014;
+    box-shadow: 9px 9px 0 #4d5738, inset 0 0 0 3px #7d8669;
+  }
+
+  .rulebook-dialog h2 {
+    margin: 0 52px 6px 0;
+    font: 900 clamp(1.8rem, 4vw, 2.7rem)/1 "Courier New", Consolas, monospace;
+    text-transform: uppercase;
+  }
+
+  .rulebook-intro {
+    margin: 0 0 16px;
+    color: #465332;
+    font: 0.75rem/1.45 "Courier New", Consolas, monospace;
+  }
+
+  .rulebook-game {
+    margin-top: 12px;
+    border: 3px solid #283216;
+    background: #c2c8ac;
+  }
+
+  .rulebook-game summary {
+    padding: 12px 14px;
+    cursor: pointer;
+    background: #263014;
+    color: #d7bd58;
+    font: 900 0.85rem "Courier New", Consolas, monospace;
+    text-transform: uppercase;
+  }
+
+  .rulebook-game[open] summary {
+    border-bottom: 3px solid #283216;
+    background: #3f5f79;
+    color: #edf0dc;
+  }
+
+  .rulebook-body {
+    padding: 14px;
+    font: 0.72rem/1.5 "Courier New", Consolas, monospace;
+  }
+
+  .rulebook-body h3 {
+    margin: 14px 0 6px;
+    color: #303a1e;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+  }
+
+  .rulebook-body h3:first-child { margin-top: 0; }
+  .rulebook-body p { margin: 5px 0; }
+  .rulebook-body ul,
+  .rulebook-body ol { margin: 6px 0; padding-left: 22px; }
+  .rulebook-body li { margin: 3px 0; }
+
+  .rulebook-controls {
+    display: grid;
+    grid-template-columns: minmax(100px, 0.35fr) 1fr;
+    margin: 8px 0;
+    border: 2px solid #6d7659;
+  }
+
+  .rulebook-controls span {
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(70, 83, 50, 0.28);
+  }
+
+  .rulebook-controls span:nth-child(odd) {
+    border-right: 2px solid #6d7659;
+    color: #20290f;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .rulebook-controls span:nth-last-child(-n + 2) { border-bottom: 0; }
+
+  @media (max-width: 640px) {
+    body:not(.playing) .landing-settings { top: 12px; right: 12px; }
+    .settings-dialog { padding: 18px 14px; }
+    .control-groups { grid-template-columns: 1fr; }
+    .rulebook-dialog { padding: 18px 12px; }
+  }
+</style>
+</head>
+<body>
+<main class="landing" id="landing">
+  <button class="landing-settings" id="settings-open" type="button" aria-haspopup="dialog">Settings</button>
+  <div class="landing-shell">
+    <section class="copy" aria-label="Game intro">
+      <div class="eyebrow">SAVE FILE // 01</div>
+      <h1>
+        <span class="title-line">Aditi's</span>
+        <span class="title-line">World <span class="title-heart" aria-label="heart">&hearts;</span></span>
+        <span class="title-line title-edition">~ Madison Edition</span>
+      </h1>
+      <p class="lede">🎂✨ Happy Birthday, Aditi! 🎮<br>Since we're not in Madison anymore, I made this small replica world for us.</p>
+      <div class="play-card">
+        <p class="section-label">Player profile</p>
+        <div class="character-select" aria-label="Choose character">
+          <button class="character-option active" type="button" data-character="Aditi">
+            <span class="character-sprite aditi" aria-hidden="true"></span>
+            <span><strong>Aditi</strong><span>Start in her room</span></span>
+          </button>
+          <button class="character-option" type="button" data-character="Shreyak">
+            <span class="character-sprite shreyak" aria-hidden="true"></span>
+            <span><strong>Shreyak</strong><span>Start in his room</span></span>
+          </button>
+        </div>
+        <button class="play-button" id="play-button" type="button">Start as Aditi</button>
+        <p class="play-note">Use WASD or arrow keys to move. Press E to interact.</p>
+        <div class="online-panel">
+          <p class="online-title">Link cable // Online</p>
+          <div class="online-actions">
+            <button class="online-button" id="host-online" type="button">Host as Aditi</button>
+            <button class="online-button" id="join-online" type="button">Join as Shreyak</button>
+          </div>
+          <div class="join-row">
+            <input class="room-code-input" id="room-code" type="text" maxlength="6" placeholder="ROOM CODE" aria-label="Multiplayer room code">
+            <button class="online-button" id="copy-room" type="button">Copy</button>
+          </div>
+          <p class="online-status" id="online-status" aria-live="polite"></p>
+        </div>
+        <label class="dev-toggle"><input id="dev-toggle" type="checkbox"> Enable dev mode</label>
+      </div>
+    </section>
+
+    <section class="art-stage" aria-hidden="true">
+      <div class="art-panel">
+        <div class="preview-header">
+          <span>World preview // Route 01</span>
+          <span class="preview-lights">
+            <i class="preview-light"></i>
+            <i class="preview-light"></i>
+            <i class="preview-light"></i>
+          </span>
+        </div>
+        <img class="saxony-building" src="assets/outsidesax/saxony-transparent.png" alt="Saxony apartments">
+        <img class="preview-tree preview-tree-1" src="assets/outsidesax/trees/tree1.png?v=1" alt="">
+        <img class="preview-tree preview-tree-2" src="assets/outsidesax/trees/tree2.png?v=1" alt="">
+        <img class="preview-tree preview-tree-3" src="assets/outsidesax/trees/tree3.png?v=1" alt="">
+        <img class="preview-tree preview-tree-4" src="assets/outsidesax/trees/tree4.png?v=1" alt="">
+        <img class="preview-tree preview-tree-5" src="assets/outsidesax/trees/tree5.png?v=1" alt="">
+        <img class="preview-tree preview-tree-6" src="assets/outsidesax/trees/tree6.png?v=1" alt="">
+        <div class="preview-character preview-character-aditi" aria-hidden="true"></div>
+        <div class="preview-character preview-character-shreyak" aria-hidden="true"></div>
+        <span class="preview-name preview-name-aditi">Aditi</span>
+        <span class="preview-name preview-name-shreyak">Shreyak</span>
+        <div class="hint-bar">
+          <span>Bedroom first</span>
+          <span>Street and campus next</span>
+          <span>Online co-op</span>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div id="settings-panel" aria-hidden="true">
+  <section class="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <button class="settings-close" id="settings-close" type="button" aria-label="Close settings">X</button>
+    <p class="settings-kicker">Save file // Controls</p>
+    <h2 id="settings-title">Route controls</h2>
+    <p class="settings-subtitle">Every key you need for the room, corridor, neighborhood, and minigames.</p>
+    <div class="control-groups">
+      <section class="control-group">
+        <h3>Adventure</h3>
+        <div class="control-row"><span class="control-key">WASD / Arrows</span><span class="control-action">Move your character</span></div>
+        <div class="control-row"><span class="control-key">E</span><span class="control-action">Interact, enter, or exit</span></div>
+        <div class="control-row"><span class="control-key">Q</span><span class="control-action">Open inventory</span></div>
+        <div class="control-row"><span class="control-key">G</span><span class="control-action">Give an item to the nearby player</span></div>
+        <div class="control-row"><span class="control-key">T</span><span class="control-action">Open chat</span></div>
+        <div class="control-row"><span class="control-key">M</span><span class="control-action">Open route music</span></div>
+        <div class="control-row"><span class="control-key">Esc</span><span class="control-action">Close the current menu</span></div>
+      </section>
+      <section class="control-group">
+        <h3>Chat & Menus</h3>
+        <div class="control-row"><span class="control-key">Type</span><span class="control-action">Letters stay in the text box</span></div>
+        <div class="control-row"><span class="control-key">Enter</span><span class="control-action">Send chat or confirm</span></div>
+        <div class="control-row"><span class="control-key">Esc</span><span class="control-action">Cancel chat or close a panel</span></div>
+        <div class="control-row"><span class="control-key">Mouse</span><span class="control-action">Choose buttons, tracks, and files</span></div>
+      </section>
+      <section class="control-group">
+        <h3>Connect Four</h3>
+        <div class="control-row"><span class="control-key">Left / Right</span><span class="control-action">Choose a column</span></div>
+        <div class="control-row"><span class="control-key">E / Space</span><span class="control-action">Drop a piece</span></div>
+        <div class="control-row"><span class="control-key">R</span><span class="control-action">Restart after the game</span></div>
+        <div class="control-row"><span class="control-key">Esc</span><span class="control-action">Leave the game</span></div>
+      </section>
+      <section class="control-group">
+        <h3>Claw Machine</h3>
+        <div class="control-row"><span class="control-key">A / D / Arrows</span><span class="control-action">Steer the claw</span></div>
+        <div class="control-row"><span class="control-key">Space</span><span class="control-action">Drop the claw</span></div>
+        <div class="control-row"><span class="control-key">Esc</span><span class="control-action">Leave or try again</span></div>
+      </section>
+      <section class="control-group">
+        <h3>Dev Mode</h3>
+        <div class="control-row"><span class="control-key">F2</span><span class="control-action">Toggle or finish dev mode</span></div>
+        <div class="control-row"><span class="control-key">Click asset</span><span class="control-action">Select an asset</span></div>
+        <div class="control-row"><span class="control-key">WASD / Arrows</span><span class="control-action">Move selected asset</span></div>
+        <div class="control-row"><span class="control-key">X / Z</span><span class="control-action">Resize selected asset</span></div>
+        <div class="control-row"><span class="control-key">R / Shift+R</span><span class="control-action">Rotate selected asset</span></div>
+        <div class="control-row"><span class="control-key">PgUp / PgDn</span><span class="control-action">Change asset layer</span></div>
+        <div class="control-row"><span class="control-key">Ctrl+D / Delete</span><span class="control-action">Duplicate or remove asset</span></div>
+      </section>
+    </div>
+    <p class="settings-footnote">Dev mode changes are saved to this browser and shared world layouts stay persistent when the game reconnects.</p>
+    <button class="rulebook-open" id="rulebook-open" type="button">Game rulebook</button>
+    <button class="back-to-menu" id="back-to-menu" type="button">Back to menu</button>
+  </section>
+</div>
+
+<div id="rulebook-panel" aria-hidden="true">
+  <section class="rulebook-dialog" role="dialog" aria-modal="true" aria-labelledby="rulebook-title">
+    <button class="settings-close" id="rulebook-close" type="button" aria-label="Close game rulebook">X</button>
+    <p class="settings-kicker">Trainer guide // Minigames</p>
+    <h2 id="rulebook-title">Game rulebook</h2>
+    <p class="rulebook-intro">Choose a game below. Connect Four and Mancala require both players in the same online room. The claw machine is played separately.</p>
+
+    <details class="rulebook-game" open>
+      <summary>Connect Four // Kung Fu Tea</summary>
+      <div class="rulebook-body">
+        <h3>Start</h3>
+        <p>Both players enter Kung Fu Tea in the same multiplayer room. Press <strong>E</strong> at the board. The first player waits until the second player approaches the table and joins.</p>
+        <h3>Controls</h3>
+        <div class="rulebook-controls">
+          <span>Left / Right</span><span>Select a column</span>
+          <span>E / Space</span><span>Drop a piece</span>
+          <span>Mouse</span><span>Choose and play a column</span>
+          <span>Esc</span><span>Leave the board</span>
+          <span>R</span><span>Rematch after a result</span>
+        </div>
+        <h3>Rules</h3>
+        <ul>
+          <li>Aditi uses red pieces. Shreyak uses yellow pieces.</li>
+          <li>Players alternate dropping one piece into a non-full column.</li>
+          <li>The first horizontal, vertical, or diagonal line of four wins.</li>
+          <li>A completely full board without four connected pieces is a draw.</li>
+          <li>The player who did not start the previous match starts the rematch.</li>
+          <li>If someone leaves, the board resets and the remaining player waits.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="rulebook-game">
+      <summary>Mancala // Sencha Tea Bar</summary>
+      <div class="rulebook-body">
+        <h3>Start</h3>
+        <p>Both players enter Sencha in the same multiplayer room. Press <strong>E</strong> at the Mancala table. The first player waits for the second player to join.</p>
+        <h3>Controls</h3>
+        <div class="rulebook-controls">
+          <span>Left / Right</span><span>Select one of your six pits</span>
+          <span>E / Space</span><span>Sow the selected beads</span>
+          <span>Mouse</span><span>Choose and sow a pit</span>
+          <span>Esc</span><span>Leave the table</span>
+          <span>R</span><span>Rematch after a result</span>
+        </div>
+        <h3>Rules</h3>
+        <ol>
+          <li>Each of the twelve small pits begins with four beads.</li>
+          <li>Choose a non-empty pit on your side and sow its beads one at a time.</li>
+          <li>Place a bead in your own store, but skip the opponent's store.</li>
+          <li>If the final bead lands in your store, take another turn.</li>
+          <li>If it lands in an empty pit on your side, capture it and all beads in the opposite pit.</li>
+          <li>When one side is empty, the other player collects all remaining beads.</li>
+          <li>The largest store total wins. Equal totals produce a draw.</li>
+        </ol>
+      </div>
+    </details>
+
+    <details class="rulebook-game">
+      <summary>Clawcade // Chocolate Shoppe</summary>
+      <div class="rulebook-body">
+        <h3>Start</h3>
+        <p>Press <strong>E</strong> at the claw machine. After its opening animation, you have seven seconds to position the claw.</p>
+        <h3>Controls</h3>
+        <div class="rulebook-controls">
+          <span>A / D</span><span>Steer left or right</span>
+          <span>Arrows</span><span>Steer left or right</span>
+          <span>Space</span><span>Drop the claw or play again</span>
+          <span>Esc</span><span>Leave the machine</span>
+        </div>
+        <h3>Rules</h3>
+        <ul>
+          <li>The claw accelerates and carries momentum while moving.</li>
+          <li>Time running out drops the claw automatically.</li>
+          <li>Align the claw closely with a plush to catch it.</li>
+          <li>Every caught plush has a 40 percent chance to slip.</li>
+          <li>A secured plush travels to the bottom-left chute and enters the active character's inventory.</li>
+          <li>Open the inventory with <strong>Q</strong> after leaving the machine.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+</div>
+
+<div id="game-wrap" aria-live="polite"></div>
+<div class="multiplayer-hud" id="multiplayer-hud" aria-live="polite"></div>
+<div id="chat-entry" aria-hidden="true">
+  <form id="chat-entry-form">
+    <input id="chat-entry-input" type="text" maxlength="120" autocomplete="off" placeholder="Type a message..." aria-label="Chat message">
+    <button type="submit">Send</button>
+  </form>
+  <p class="chat-entry-hint">ENTER send // ESC cancel</p>
+</div>
+
+<div id="photo-gallery" aria-hidden="true">
+  <section class="gallery-panel" role="dialog" aria-modal="true" aria-labelledby="gallery-title">
+    <button class="gallery-close" id="gallery-close" type="button" aria-label="Close gallery">×</button>
+    <p class="gallery-kicker">Memorydex // Route 01</p>
+    <h2 id="gallery-title">Photo frame</h2>
+    <p class="gallery-subtitle" id="gallery-subtitle">A few memories from the room.</p>
+    <div class="photo-viewer">
+      <button class="gallery-nav" id="gallery-prev" type="button" aria-label="Previous photo">←</button>
+      <div class="photo-grid" id="photo-grid"></div>
+      <button class="gallery-nav" id="gallery-next" type="button" aria-label="Next photo">→</button>
+    </div>
+    <p class="gallery-counter" id="gallery-counter"></p>
+    <form class="gallery-add" id="gallery-add-form">
+      <div class="gallery-add-row">
+        <input id="photo-file" type="file" accept="image/*" required>
+        <input id="photo-note" type="text" placeholder="Add a note" maxlength="140" required>
+        <button type="submit">Add photo</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<div id="photo-booth-reveal" aria-hidden="true">
+  <section class="photo-booth-panel" role="dialog" aria-modal="true" aria-labelledby="photo-booth-title">
+    <button class="gallery-close" id="photo-booth-close" type="button" aria-label="Close photo booth print">×</button>
+    <p class="gallery-kicker">Kung Fu Tea // Photo Booth</p>
+    <h2 id="photo-booth-title">Your photo strip</h2>
+    <p class="gallery-subtitle">A little stop worth saving.</p>
+    <div class="photo-booth-print">
+      <img id="photo-booth-image" src="assets/insidekungfutea/photoboothimage.png?v=1" alt="Photo booth strip of Aditi and Shreyak">
+    </div>
+    <div class="photo-booth-actions">
+      <a id="photo-booth-download" href="assets/insidekungfutea/photoboothimage.png?v=1" download="kung-fu-tea-photo-booth.png">Download photo</a>
+      <button id="photo-booth-done" type="button">Done</button>
+    </div>
+  </section>
+</div>
+
+<div id="music-panel" aria-hidden="true">
+  <section class="music-dialog" role="dialog" aria-modal="true" aria-labelledby="music-title">
+    <button class="music-close" id="music-close" type="button" aria-label="Close music panel">X</button>
+    <p class="music-kicker">Audius // Open music network</p>
+    <h2 id="music-title">Route radio</h2>
+    <p class="music-subtitle">Search and play complete tracks without leaving the game.</p>
+    <div id="music-embed">
+      <p class="music-empty">Choose a track below to start the route soundtrack.</p>
+    </div>
+    <form class="music-form" id="music-form">
+      <input id="music-search" type="search" maxlength="80" placeholder="Search Audius: lofi, chill, pop..." aria-label="Search Audius">
+      <button type="submit">Search</button>
+    </form>
+    <button class="music-trending" id="music-trending" type="button">Show trending tracks</button>
+    <div class="music-results" id="music-results" aria-live="polite"></div>
+    <label class="music-file-label">Choose audio file
+      <input id="music-file" type="file" accept="audio/*,.mp3,.ogg,.wav,.m4a,.aac,.flac">
+    </label>
+    <p class="music-status" id="music-status" aria-live="polite"></p>
+    <p class="music-help">M opens this panel. Escape closes it while the music keeps playing. Playback is independent for each player.</p>
+  </section>
+</div>
+
+<!-- Phaser is a UMD bundle: loaded classically, it exposes the global the
+     ES modules below use. Everything game-side is proper import/export;
+     main.js is the only entry point; it pulls in the rest. -->
+<script src="js/phaser.min.js"></script>
+<script type="module" src="js/main.js"></script>
+<script>
+  const playButton = document.getElementById("play-button");
+  const devToggle = document.getElementById("dev-toggle");
+  const characterOptions = [...document.querySelectorAll("[data-character]")];
+  const hostOnline = document.getElementById("host-online");
+  const joinOnline = document.getElementById("join-online");
+  const copyRoom = document.getElementById("copy-room");
+  const roomCodeInput = document.getElementById("room-code");
+  const onlineStatus = document.getElementById("online-status");
+  const multiplayerHud = document.getElementById("multiplayer-hud");
+  const musicPanel = document.getElementById("music-panel");
+  const musicClose = document.getElementById("music-close");
+  const musicForm = document.getElementById("music-form");
+  const musicSearch = document.getElementById("music-search");
+  const musicTrending = document.getElementById("music-trending");
+  const musicResults = document.getElementById("music-results");
+  const musicFile = document.getElementById("music-file");
+  const musicEmbed = document.getElementById("music-embed");
+  const musicStatus = document.getElementById("music-status");
+  const settingsOpen = document.getElementById("settings-open");
+  const settingsPanel = document.getElementById("settings-panel");
+  const settingsClose = document.getElementById("settings-close");
+  const rulebookOpen = document.getElementById("rulebook-open");
+  const rulebookPanel = document.getElementById("rulebook-panel");
+  const rulebookClose = document.getElementById("rulebook-close");
+  const backToMenu = document.getElementById("back-to-menu");
+  const root = document.body;
+
+  let selectedCharacter = localStorage.getItem("aditi-active-player") || "Aditi";
+
+  function openSettings() {
+    settingsPanel.classList.add("open");
+    settingsPanel.setAttribute("aria-hidden", "false");
+    settingsClose.focus();
+    window.__textInputActive = true;
+  }
+
+  function closeSettings() {
+    closeRulebook(false);
+    settingsPanel.classList.remove("open");
+    settingsPanel.setAttribute("aria-hidden", "true");
+    window.__textInputActive = false;
+    if (!root.classList.contains("playing")) settingsOpen.focus();
+  }
+
+  function openRulebook() {
+    rulebookPanel.classList.add("open");
+    rulebookPanel.setAttribute("aria-hidden", "false");
+    rulebookClose.focus();
+    window.__textInputActive = true;
+  }
+
+  function closeRulebook(restoreFocus = true) {
+    if (!rulebookPanel.classList.contains("open")) return;
+    rulebookPanel.classList.remove("open");
+    rulebookPanel.setAttribute("aria-hidden", "true");
+    window.__textInputActive = settingsPanel.classList.contains("open");
+    if (restoreFocus) rulebookOpen.focus();
+  }
+
+  settingsOpen.addEventListener("click", openSettings);
+  settingsClose.addEventListener("click", closeSettings);
+  rulebookOpen.addEventListener("click", openRulebook);
+  rulebookClose.addEventListener("click", () => closeRulebook());
+  settingsPanel.addEventListener("click", (event) => {
+    if (event.target === settingsPanel) closeSettings();
+  });
+  rulebookPanel.addEventListener("click", (event) => {
+    if (event.target === rulebookPanel) closeRulebook();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.shiftKey && event.code === "Digit1" && !event.repeat) {
+      event.preventDefault();
+      openSettings();
+      return;
+    }
+    if (event.key === "Escape" && rulebookPanel.classList.contains("open")) closeRulebook();
+    else if (event.key === "Escape" && settingsPanel.classList.contains("open")) closeSettings();
+  });
+
+  function selectCharacter(character) {
+    selectedCharacter = character;
+    localStorage.setItem("aditi-active-player", character);
+    characterOptions.forEach((option) => option.classList.toggle("active", option.dataset.character === character));
+    document.querySelector(".preview-character-aditi")?.classList.toggle("selected", character === "Aditi");
+    document.querySelector(".preview-character-shreyak")?.classList.toggle("selected", character === "Shreyak");
+    document.querySelector(".preview-name-aditi")?.classList.toggle("selected", character === "Aditi");
+    document.querySelector(".preview-name-shreyak")?.classList.toggle("selected", character === "Shreyak");
+    playButton.textContent = `Start as ${character}`;
+  }
+
+  characterOptions.forEach((option) => option.addEventListener("click", () => selectCharacter(option.dataset.character)));
+  selectCharacter(selectedCharacter);
+
+  const gallery = document.getElementById("photo-gallery");
+  const photoGrid = document.getElementById("photo-grid");
+  const galleryClose = document.getElementById("gallery-close");
+  const galleryPrev = document.getElementById("gallery-prev");
+  const galleryNext = document.getElementById("gallery-next");
+  const galleryCounter = document.getElementById("gallery-counter");
+  const photoFile = document.getElementById("photo-file");
+  const photoNote = document.getElementById("photo-note");
+  const photoBoothReveal = document.getElementById("photo-booth-reveal");
+  const photoBoothClose = document.getElementById("photo-booth-close");
+  const photoBoothDone = document.getElementById("photo-booth-done");
+  const photoBoothImage = document.getElementById("photo-booth-image");
+  const photoSets = {
+    Aditi: {
+      folder: "assets/bedroom/images",
+      notesKey: "aditi-photo-notes-v1",
+      uploadsKey: "aditi-user-photos-v1",
+      photos: [
+        "WhatsApp Image 2026-07-12 at 10.28.25 PM.jpeg",
+        "WhatsApp Image 2026-07-12 at 10.28.25 PM (1).jpeg",
+        "WhatsApp Image 2026-07-12 at 10.28.25 PM (2).jpeg",
+        "WhatsApp Image 2026-07-12 at 10.28.25 PM (3).jpeg",
+      ],
+      notes: [
+        "A little moment worth keeping.",
+        "A memory from the people who make this place feel like home.",
+        "One more picture for the frame.",
+        "Saved here for when you want to look back.",
+      ],
+    },
+    Shreyak: {
+      folder: "assets/shreyakbedroom/images",
+      notesKey: "shreyak-photo-notes-v1",
+      uploadsKey: "shreyak-user-photos-v1",
+      photos: [
+        "WhatsApp Image 2026-07-12 at 10.56.35 PM.jpeg",
+        "WhatsApp Image 2026-07-12 at 10.56.35 PM (1).jpeg",
+        "WhatsApp Image 2026-07-12 at 10.56.35 PM (2).jpeg",
+        "WhatsApp Image 2026-07-12 at 10.56.35 PM (3).jpeg",
+        "WhatsApp Image 2026-07-12 at 10.56.35 PM (4).jpeg",
+        "WhatsApp Image 2026-07-12 at 10.56.35 PM (5).jpeg",
+        "WhatsApp Image 2026-07-12 at 10.56.35 PM (6).jpeg",
+      ],
+      notes: [
+        "A memory from Shreyak's side of the hallway.",
+        "Saved here for the next time you look back.",
+        "One more little piece of the story.",
+        "A moment worth keeping close.",
+        "A familiar face in a familiar place.",
+        "The kind of memory that belongs in a room.",
+        "A small snapshot from the outside world.",
+      ],
+    },
+    Corridor: {
+      folder: "assets/insidesax/images",
+      notesKey: "sax-corridor-photo-notes-v1",
+      uploadsKey: "sax-corridor-user-photos-v1",
+      photos: [],
+      notes: [],
+    },
+    KungFuTea: {
+      folder: "assets/insidekungfutea/images",
+      notesKey: "kung-fu-tea-photo-notes-v1",
+      uploadsKey: "kung-fu-tea-user-photos-v1",
+      photos: [
+        "WhatsApp Image 2026-07-17 at 2.04.25 PM.jpeg",
+        "WhatsApp Image 2026-07-17 at 2.04.25 PM (1).jpeg",
+        "WhatsApp Image 2026-07-17 at 2.04.25 PM (2).jpeg",
+        "WhatsApp Image 2026-07-17 at 2.04.25 PM (3).jpeg",
+      ],
+      notes: [
+        "A tea break worth saving.",
+        "One more little stop on the route.",
+        "The kind of memory that makes the walk home better.",
+        "Kung Fu Tea, captured one frame at a time.",
+      ],
+    },
+    ChocolateShoppe: {
+      folder: "assets/insidechocolateshoppe/images",
+      notesKey: "chocolate-shoppe-photo-notes-v1",
+      uploadsKey: "chocolate-shoppe-user-photos-v1",
+      photos: [
+        "im1.jpeg",
+        "im2.jpeg",
+      ],
+      notes: [
+        "A sweet little memory from the shoppe.",
+        "One more stop worth keeping.",
+      ],
+    },
+    Sencha: {
+      folder: "assets/insidesencha/images",
+      notesKey: "sencha-photo-notes-v1",
+      uploadsKey: "sencha-user-photos-v1",
+      photos: ["aditi.jpeg", "me.jpeg"],
+      notes: [
+        "A tea-room memory worth keeping.",
+        "One more warm stop on the Madison route.",
+      ],
+    },
+  };
+  let galleryOwner = "Aditi";
+  let galleryPhotos = [];
+  let galleryIndex = 0;
+
+  function readJson(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch (err) { return fallback; }
+  }
+
+  function renderGallery() {
+    const set = photoSets[galleryOwner];
+    const notes = readJson(set.notesKey, {});
+    const uploads = readJson(set.uploadsKey, []);
+    galleryPhotos = set.photos.map((name, index) => ({
+      src: `${set.folder}/${name}`,
+      note: notes[`bundled-${index}`] || set.notes[index],
+      id: `bundled-${index}`,
+    })).concat(uploads);
+    if (galleryIndex >= galleryPhotos.length) galleryIndex = Math.max(0, galleryPhotos.length - 1);
+    photoGrid.replaceChildren();
+    const photo = galleryPhotos[galleryIndex];
+    if (!photo) {
+      const empty = document.createElement("p");
+      empty.className = "photo-empty";
+      empty.textContent = "No photos in this frame yet.";
+      photoGrid.appendChild(empty);
+      galleryCounter.textContent = "PHOTO 00 / 00";
+      galleryPrev.disabled = true;
+      galleryNext.disabled = true;
+      return;
+    }
+      const card = document.createElement("article");
+      card.className = "photo-card";
+      const image = document.createElement("img");
+      image.src = photo.src;
+      image.alt = `Photo from ${galleryOwner}'s frame`;
+      card.appendChild(image);
+      const editor = document.createElement("textarea");
+      editor.className = "photo-note-editor";
+      editor.value = photo.note || "";
+      editor.placeholder = "Write a note for this memory...";
+      editor.setAttribute("aria-label", "Photo note");
+      editor.addEventListener("input", () => {
+        if (photo.id.startsWith("upload-")) {
+          const savedUploads = readJson(set.uploadsKey, []);
+          const upload = savedUploads.find((item) => item.id === photo.id);
+          if (upload) upload.note = editor.value;
+          localStorage.setItem(set.uploadsKey, JSON.stringify(savedUploads));
+        } else {
+          const saved = readJson(set.notesKey, {});
+          saved[photo.id] = editor.value;
+          localStorage.setItem(set.notesKey, JSON.stringify(saved));
+        }
+      });
+      card.appendChild(editor);
+      photoGrid.appendChild(card);
+    galleryCounter.textContent = `PHOTO ${String(galleryIndex + 1).padStart(2, "0")} / ${String(galleryPhotos.length).padStart(2, "0")}`;
+    galleryPrev.disabled = galleryIndex === 0;
+    galleryNext.disabled = galleryIndex >= galleryPhotos.length - 1;
+  }
+
+  function closeGallery() {
+    gallery.classList.remove("open");
+    gallery.setAttribute("aria-hidden", "true");
+    window.__roomGalleryOpen = false;
+  }
+
+  window.__openPhotoGallery = (owner = "Aditi") => {
+    galleryOwner = owner;
+    galleryIndex = 0;
+    const isHallwayFrame = owner === "Corridor";
+    const isTeaShopFrame = owner === "KungFuTea";
+    const isChocolateShoppeFrame = owner === "ChocolateShoppe";
+    const isSenchaFrame = owner === "Sencha";
+    document.getElementById("gallery-title").textContent = isHallwayFrame
+      ? "Hallway photo frame"
+      : (isTeaShopFrame ? "Kung Fu Tea photo frame" : (isChocolateShoppeFrame ? "Chocolate Shoppe photo frame" : (isSenchaFrame ? "Sencha photo frame" : `${owner}'s photo frame`)));
+    document.getElementById("gallery-subtitle").textContent = isHallwayFrame
+      ? "Shared memories from the Sax Apartments."
+      : (isTeaShopFrame ? "Tea shop memories, saved one frame at a time." : (isChocolateShoppeFrame ? "Sweet memories, saved one frame at a time." : (isSenchaFrame ? "Tea-room memories, saved one frame at a time." : `${owner}'s memories, saved one frame at a time.`)));
+    renderGallery();
+    gallery.classList.add("open");
+    gallery.setAttribute("aria-hidden", "false");
+    window.__roomGalleryOpen = true;
+  };
+
+  galleryClose.addEventListener("click", closeGallery);
+  galleryPrev.addEventListener("click", () => { if (galleryIndex > 0) { galleryIndex -= 1; renderGallery(); } });
+  galleryNext.addEventListener("click", () => { if (galleryIndex < galleryPhotos.length - 1) { galleryIndex += 1; renderGallery(); } });
+  gallery.addEventListener("click", (event) => { if (event.target === gallery) closeGallery(); });
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape" && gallery.classList.contains("open")) closeGallery(); });
+
+  function closePhotoBooth() {
+    photoBoothReveal.classList.remove("open");
+    photoBoothReveal.setAttribute("aria-hidden", "true");
+    window.__photoBoothOpen = false;
+  }
+
+  window.__openPhotoBooth = () => {
+    if (window.__photoBoothPrintSrc) photoBoothImage.src = window.__photoBoothPrintSrc;
+    photoBoothReveal.classList.add("open");
+    photoBoothReveal.setAttribute("aria-hidden", "false");
+    window.__photoBoothOpen = true;
+  };
+
+  photoBoothClose.addEventListener("click", closePhotoBooth);
+  photoBoothDone.addEventListener("click", closePhotoBooth);
+  photoBoothReveal.addEventListener("click", (event) => { if (event.target === photoBoothReveal) closePhotoBooth(); });
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape" && photoBoothReveal.classList.contains("open")) closePhotoBooth(); });
+  document.getElementById("gallery-add-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const file = photoFile.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const set = photoSets[galleryOwner];
+      const uploads = readJson(set.uploadsKey, []);
+      uploads.push({ id: `upload-${Date.now()}`, src: reader.result, note: photoNote.value });
+      localStorage.setItem(set.uploadsKey, JSON.stringify(uploads));
+      photoFile.value = "";
+      photoNote.value = "";
+      renderGallery();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  let audiusLoaded = false;
+  let audiusRequest = null;
+  let localMusicObjectUrl = "";
+
+  function formatTrackTime(seconds) {
+    const duration = Math.max(0, Number(seconds) || 0);
+    return `${Math.floor(duration / 60)}:${String(Math.floor(duration % 60)).padStart(2, "0")}`;
+  }
+
+  function playFullTrack(src, name, artist = "", artwork = "") {
+    if (!src) return;
+    const nowPlaying = document.createElement("div");
+    nowPlaying.className = "music-now-playing";
+    if (artwork) {
+      const cover = document.createElement("img");
+      cover.src = artwork;
+      cover.alt = "";
+      nowPlaying.appendChild(cover);
+    }
+    const details = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = name;
+    const byline = document.createElement("span");
+    byline.textContent = artist || "Local audio";
+    details.append(title, byline);
+    nowPlaying.appendChild(details);
+    const player = document.createElement("audio");
+    player.controls = true;
+    player.autoplay = true;
+    player.loop = true;
+    player.preload = "auto";
+    player.src = src;
+    player.setAttribute("aria-label", `Now playing ${name}`);
+    nowPlaying.appendChild(player);
+    musicEmbed.replaceChildren(nowPlaying);
+    musicStatus.classList.remove("error");
+    musicStatus.textContent = `${name} // streaming full track`;
+    player.play().catch(() => {
+      musicStatus.textContent = `${name} // press Play to begin`;
+    });
+  }
+
+  function renderAudiusTracks(tracks) {
+    musicResults.replaceChildren();
+    if (!tracks.length) {
+      const empty = document.createElement("p");
+      empty.className = "music-empty";
+      empty.textContent = "No playable Audius tracks found. Try another search.";
+      musicResults.appendChild(empty);
+      return;
+    }
+    tracks.forEach((track) => {
+      const button = document.createElement("button");
+      button.className = "music-result";
+      button.type = "button";
+
+      const cover = document.createElement("img");
+      cover.src = track.artwork || "";
+      cover.alt = "";
+
+      const copy = document.createElement("span");
+      const title = document.createElement("strong");
+      title.textContent = track.title;
+      const artist = document.createElement("span");
+      artist.textContent = track.genre ? `${track.artist} // ${track.genre}` : track.artist;
+      copy.append(title, artist);
+
+      const duration = document.createElement("time");
+      duration.textContent = formatTrackTime(track.duration);
+      button.append(cover, copy, duration);
+      button.addEventListener("click", () => {
+        if (localMusicObjectUrl) {
+          URL.revokeObjectURL(localMusicObjectUrl);
+          localMusicObjectUrl = "";
+        }
+        localStorage.setItem("aditi-audius-track", JSON.stringify(track));
+        playFullTrack(track.streamUrl, track.title, track.artist, track.artwork);
+      });
+      musicResults.appendChild(button);
+    });
+  }
+
+  async function loadAudiusTracks(query = "") {
+    audiusRequest?.abort();
+    audiusRequest = new AbortController();
+    musicStatus.classList.remove("error");
+    musicStatus.textContent = query ? `Searching Audius for "${query}"...` : "Loading Audius trending tracks...";
+    musicResults.setAttribute("aria-busy", "true");
+    try {
+      const endpoint = query ? `/api/audius?q=${encodeURIComponent(query)}` : "/api/audius";
+      const response = await fetch(endpoint, { cache: "no-store", signal: audiusRequest.signal });
+      if (!response.ok) throw new Error("Audius is temporarily unavailable.");
+      const tracks = await response.json();
+      renderAudiusTracks(tracks);
+      audiusLoaded = true;
+      musicStatus.textContent = `${tracks.length} Audius track${tracks.length === 1 ? "" : "s"} ready.`;
+    } catch (error) {
+      if (error.name === "AbortError") return;
+      musicStatus.textContent = `${error.message} You can still choose a local audio file.`;
+      musicStatus.classList.add("error");
+    } finally {
+      musicResults.removeAttribute("aria-busy");
+    }
+  }
+
+  function openMusic() {
+    musicPanel.classList.add("open");
+    musicPanel.setAttribute("aria-hidden", "false");
+    window.__musicPanelOpen = true;
+    if (!audiusLoaded) loadAudiusTracks();
+    requestAnimationFrame(() => musicSearch.focus());
+  }
+
+  function closeMusic() {
+    musicPanel.classList.remove("open");
+    musicPanel.setAttribute("aria-hidden", "true");
+    window.__musicPanelOpen = false;
+  }
+
+  musicForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    loadAudiusTracks(musicSearch.value.trim());
+  });
+  musicTrending.addEventListener("click", () => {
+    musicSearch.value = "";
+    loadAudiusTracks();
+  });
+  musicFile.addEventListener("change", () => {
+    const file = musicFile.files?.[0];
+    if (!file) return;
+    if (localMusicObjectUrl) URL.revokeObjectURL(localMusicObjectUrl);
+    localMusicObjectUrl = URL.createObjectURL(file);
+    playFullTrack(localMusicObjectUrl, file.name.replace(/\.[^.]+$/, ""), "Local audio");
+    musicFile.value = "";
+  });
+  musicClose.addEventListener("click", closeMusic);
+  musicPanel.addEventListener("click", (event) => { if (event.target === musicPanel) closeMusic(); });
+  document.addEventListener("keydown", (event) => {
+    if (event.key.toLowerCase() === "m" && !event.repeat && root.classList.contains("playing") &&
+        !["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)) {
+      event.preventDefault();
+      openMusic();
+    }
+    if (event.key === "Escape" && musicPanel.classList.contains("open")) closeMusic();
+  });
+
+  devToggle.checked = localStorage.getItem("aditi-dev-mode") === "1";
+  devToggle.addEventListener("change", () => {
+    localStorage.setItem("aditi-dev-mode", devToggle.checked ? "1" : "0");
+  });
+
+  async function enterGame(character = selectedCharacter) {
+    selectCharacter(character);
+    window.__activePlayer = selectedCharacter;
+    window.__playerFacing = "down";
+    window.__aditiGame?.scene?.start("Room", { owner: selectedCharacter });
+    root.classList.add("playing");
+    window.dispatchEvent(new Event("resize"));
+
+    if (document.fullscreenElement) {
+      window.__aditiGame?.scale?.refresh();
+      return;
+    }
+
+    const target = document.documentElement;
+    if (target.requestFullscreen) {
+      try {
+        await target.requestFullscreen();
+      } catch (err) {
+        console.warn("Fullscreen request was blocked.", err);
+      }
+    }
+
+    window.__aditiGame?.scale?.refresh();
+  }
+
+  async function returnToMenu() {
+    closeSettings();
+    closeMusic();
+    closeGallery();
+    closePhotoBooth();
+    window.__multiplayer?.disconnect();
+    root.classList.remove("playing", "online");
+    multiplayerHud.textContent = "";
+    for (const scene of window.__aditiGame?.scene?.getScenes(true) || []) {
+      if (scene.scene.key !== "Boot") scene.scene.stop();
+    }
+    if (document.fullscreenElement && document.exitFullscreen) {
+      try { await document.exitFullscreen(); } catch (err) {}
+    }
+    window.dispatchEvent(new Event("resize"));
+  }
+
+  backToMenu.addEventListener("click", returnToMenu);
+
+  document.addEventListener("fullscreenchange", () => {
+    window.__aditiGame?.scale?.refresh();
+    window.dispatchEvent(new Event("resize"));
+  });
+
+  function setOnlineStatus(message, isError = false) {
+    onlineStatus.textContent = message;
+    onlineStatus.classList.toggle("error", isError);
+  }
+
+  async function startOnline(role, room) {
+    const multiplayer = window.__multiplayer;
+    if (!multiplayer) {
+      setOnlineStatus("The multiplayer client is still loading. Try again.", true);
+      return;
+    }
+    hostOnline.disabled = true;
+    joinOnline.disabled = true;
+    setOnlineStatus(`Connecting to room ${room}...`);
+    try {
+      await multiplayer.connect({ room, role });
+      roomCodeInput.value = multiplayer.room;
+      multiplayerHud.textContent = `ROOM ${multiplayer.room}  /  ${role}  /  waiting for player`;
+      root.classList.add("online");
+      setOnlineStatus(`Connected to ${multiplayer.room} as ${role}.`);
+      await enterGame(role);
+    } catch (err) {
+      setOnlineStatus(err.message || "Could not join the room.", true);
+      hostOnline.disabled = false;
+      joinOnline.disabled = false;
+    }
+  }
+
+  hostOnline.addEventListener("click", () => {
+    const code = window.__multiplayer?.constructor?.createRoomCode?.() || Math.random().toString(36).slice(2, 8).toUpperCase();
+    roomCodeInput.value = code;
+    startOnline("Aditi", code);
+  });
+
+  joinOnline.addEventListener("click", () => {
+    const code = roomCodeInput.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+    roomCodeInput.value = code;
+    if (code.length !== 6) {
+      setOnlineStatus("Enter the six-character room code.", true);
+      return;
+    }
+    startOnline("Shreyak", code);
+  });
+
+  copyRoom.addEventListener("click", async () => {
+    if (!roomCodeInput.value) return;
+    await navigator.clipboard?.writeText(roomCodeInput.value);
+    setOnlineStatus(`Copied room ${roomCodeInput.value}.`);
+  });
+
+  window.addEventListener("aditi-multiplayer-status", (event) => {
+    const { status, room, role } = event.detail;
+    if (status === "peer-joined") multiplayerHud.textContent = `ROOM ${room}  /  ${role}  /  both players online`;
+    else if (status === "peer-left") multiplayerHud.textContent = `ROOM ${room}  /  ${role}  /  other player left`;
+    else if (status === "disconnected") multiplayerHud.textContent = "MULTIPLAYER DISCONNECTED";
+  });
+
+  const sharedRoom = new URLSearchParams(location.search).get("room");
+  if (sharedRoom) roomCodeInput.value = sharedRoom.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+
+  playButton.addEventListener("click", () => {
+    window.__multiplayer?.disconnect();
+    root.classList.remove("online");
+    enterGame(selectedCharacter);
+  });
+</script>
+</body>
+</html>

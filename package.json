@@ -1,0 +1,14 @@
+{
+  "name": "aditigift-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "connect-four": "^0.0.6",
+    "ws": "^8.18.3"
+  }
+}
